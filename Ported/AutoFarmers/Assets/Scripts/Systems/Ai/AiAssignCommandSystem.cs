@@ -103,8 +103,12 @@ public class AiAssignCommandSystem : SystemBase
 				selectedCommand = AiCommands.Pick;
 				closestPosition = crops[closestCropIndex].Value;
 			}
-			closestType = AiCommands.Pick;
-			closestDistanceSq = closestCropDistanceSq;
+
+			if (closestCropIndex != -1)
+			{
+				closestType = AiCommands.Pick;
+				closestDistanceSq = closestCropDistanceSq;
+			}
 
 			if (selectedCommand == AiCommands.Idle)
 			{
@@ -169,14 +173,14 @@ public class AiAssignCommandSystem : SystemBase
 	static void FindClosestCell(ref NativeArray<CellPosition> cells, ref int2 testPosition, out int closestIndex, out float closestDistanceSq)
 	{
 		closestDistanceSq = float.MaxValue;
-		closestIndex = 0;
+		closestIndex = -1;
 		for (int cellIndex = 0; cellIndex < cells.Length; cellIndex++)
 		{
 			int2 deltaPosition = cells[cellIndex].Value - testPosition;
 			float distanceSq = deltaPosition.x * deltaPosition.x + deltaPosition.y * deltaPosition.y;
 			if (distanceSq < closestDistanceSq)
 			{
-				distanceSq = closestDistanceSq;
+				closestDistanceSq = distanceSq;
 				closestIndex = cellIndex;
 			}
 		}
