@@ -7,13 +7,13 @@ using Unity.Transforms;
 
 public class AiMoveSystem : SystemBase
 {
-	const float cMovementSpeed = 1;
+	const float cMovementSpeed = 2.0f;
 
     protected override void OnUpdate()
     {
 		float deltaTime = Time.DeltaTime;
         Entities.ForEach((ref Translation currentPosition, in AiTargetCell moveTarget) => {
-			float2 direction = new float2(moveTarget.CellCoords.x, moveTarget.CellCoords.y) - new float2(currentPosition.Value.x, currentPosition.Value.z);
+			float2 direction = new float2(moveTarget.CellCoords.x + 0.5f, moveTarget.CellCoords.y + 0.5f) - new float2(currentPosition.Value.x, currentPosition.Value.z);
 
 			if (math.abs(direction.x) > math.abs(direction.y))
 			{
