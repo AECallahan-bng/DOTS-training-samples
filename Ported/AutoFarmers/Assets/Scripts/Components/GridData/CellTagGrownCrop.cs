@@ -4,6 +4,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [Serializable]
-public struct AiTagCommandSell : IComponentData
+public struct CellTagGrownCrop : IComponentData
 {
 }
