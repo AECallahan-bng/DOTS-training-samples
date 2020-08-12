@@ -38,6 +38,7 @@ public class MapGenerationSystem : SystemBase
 
                 var cell = ecb.CreateEntity();
                 ecb.AddComponent<CellTagUntilledGround>(cell);
+                ecb.AddComponent(cell, new CellPosition { Value = new int2(x,y) });
                 ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
                 ecb.AddComponent(cell, new Translation() { Value = new float3(x * content.CellSize.x, 0, y * content.CellSize.y) });
                 ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
@@ -62,14 +63,14 @@ public class MapGenerationSystem : SystemBase
         
         var size = GetSingleton<GridSize>();
         var content = GetSingleton<FarmContent>();
-        
-        float[,] noise = new float[size.Width, size.Height];
+
+        NativeArray<float> noise = new NativeArray<float>(size.Width * size.Height, Allocator.Temp);
         float offset = content.Seed % 10000;
         for (int y = 0; y != size.Height; ++y)
         {
             for (int x = 0; x != size.Width; ++x)
             {
-                noise[x, y] = Mathf.PerlinNoise(offset + x / (float)size.Height * 5, offset + y / (float)size.Width * 5) * 0.5f
+                noise[y * size.Width + x] = Mathf.PerlinNoise(offset + x / (float)size.Height * 5, offset + y / (float)size.Width * 5) * 0.5f
                             + Mathf.PerlinNoise(offset + x / (float)size.Height * 20, offset + y / (float)size.Width * 20) * 0.5f;
             }
         }
@@ -86,13 +87,14 @@ public class MapGenerationSystem : SystemBase
                 {
                     var pos = new int2(x, y);
                     var posI = PosToIndex(size2, pos);
-                    if (noise[x, y] > content.Rockthreshold && !collision[posI].Blocked)
+                    if (noise[y * size.Width + x] > content.Rockthreshold && !collision[posI].Blocked)
                     {
 
                         ecb.DestroyEntity(map[posI].Value);
 
                         var cell = ecb.CreateEntity();
                         ecb.AddComponent(cell, new RockHealth { Value = 10 });
+                        ecb.AddComponent(cell, new CellPosition { Value = pos });
                         ecb.AddComponent(cell, new Unity.Transforms.LocalToWorld() { Value = float4x4.identity });
                         ecb.AddComponent(cell, new Unity.Transforms.Translation() { Value = new float3(x * content.CellSize.x, 0, y * content.CellSize.y) });
                         ecb.AddComponent(cell, new Unity.Transforms.Rotation() { Value = quaternion.identity });
@@ -112,6 +114,8 @@ public class MapGenerationSystem : SystemBase
             }
 
         }).Run();
+
+        noise.Dispose();
     }
     void GenerateTeleporters(EntityCommandBuffer ecb)
     {
@@ -133,6 +137,7 @@ public class MapGenerationSystem : SystemBase
 
                     var cell = ecb.CreateEntity();
                     ecb.AddComponent<CellTagTeleporter>(cell);
+                    ecb.AddComponent(cell, new CellPosition { Value = pos });
                     ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
                     ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
                     ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
