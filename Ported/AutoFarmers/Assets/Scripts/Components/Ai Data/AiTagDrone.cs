@@ -4,6 +4,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 
 [Serializable]
-public struct AiTagFarmer : IComponentData
+public struct AiTagDrone : IComponentData
 {
 }
