@@ -133,21 +133,21 @@ public class MapGenerationSystem : SystemBase
 
                     var cell = ecb.CreateEntity();
                     ecb.AddComponent<CellTagTeleporter>(cell);
-                    ecb.AddComponent(cell, new Unity.Transforms.LocalToWorld() { Value = float4x4.identity });
-                    ecb.AddComponent(cell, new Unity.Transforms.Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
-                    ecb.AddComponent(cell, new Unity.Transforms.Rotation() { Value = quaternion.identity });
+                    ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
+                    ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
+                    ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
                     ecb.AddBuffer<Child>(cell);
 
                     var cellLand = ecb.Instantiate(content.UntilledLand);
-                    ecb.AddComponent(cellLand, new Unity.Transforms.Parent { Value = cell });
-                    ecb.AddComponent(cellLand, new Unity.Transforms.LocalToParent { Value = float4x4.identity });
-                    ecb.AddComponent(cellLand, new Unity.Transforms.LocalToWorld { Value = float4x4.identity });
+                    ecb.AddComponent(cellLand, new Parent { Value = cell });
+                    ecb.AddComponent(cellLand, new LocalToParent { Value = float4x4.identity });
+                    ecb.AddComponent(cellLand, new LocalToWorld { Value = float4x4.identity });
                     ecb.AppendToBuffer(cell, new Child() { Value = cellLand });
 
                     var cellTeleporter = ecb.Instantiate(content.Teleporter);
-                    ecb.AddComponent(cellTeleporter, new Unity.Transforms.Parent { Value = cell });
-                    ecb.AddComponent(cellTeleporter, new Unity.Transforms.LocalToParent { Value = float4x4.identity });
-                    ecb.AddComponent(cellTeleporter, new Unity.Transforms.LocalToWorld { Value = float4x4.identity });
+                    ecb.AddComponent(cellTeleporter, new Parent { Value = cell });
+                    ecb.AddComponent(cellTeleporter, new LocalToParent { Value = float4x4.identity });
+                    ecb.AddComponent(cellTeleporter, new LocalToWorld { Value = float4x4.identity });
                     ecb.AppendToBuffer(cell, new Child() { Value = cellTeleporter });
 
 
