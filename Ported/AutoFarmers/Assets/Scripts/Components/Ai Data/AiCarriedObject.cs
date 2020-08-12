@@ -5,5 +5,5 @@ using Unity.Mathematics;
 
 public struct AiCarriedObject : IComponentData
 {
-	Entity CarriedObjectEntity;
+	public Entity CarriedObjectEntity;
 }
