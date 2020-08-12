@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2802422459349966442}
   - component: {fileID: 1571168143043148022}
   m_Layer: 0
-  m_Name: Land
+  m_Name: UntilledLand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -60,7 +60,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c556966c2e0e3c64287aed8076b1b1e6, type: 2}
+  - {fileID: 2100000, guid: 92f9e2301cc701d498e8bcc95ba19ec5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

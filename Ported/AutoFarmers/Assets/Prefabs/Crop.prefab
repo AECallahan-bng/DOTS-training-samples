@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 4366251168114033017}
   - component: {fileID: 4335527752979120653}
   m_Layer: 0
-  m_Name: Corn_Plant
+  m_Name: Crop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
