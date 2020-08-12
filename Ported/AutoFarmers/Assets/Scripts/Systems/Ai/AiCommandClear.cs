@@ -12,6 +12,22 @@ public class AiCommandClear : SystemBase
     }
     protected override void OnUpdate()
     {
+
+        var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
+
+        Entities
+            .WithAll<AiTagCommandClear>()
+            .ForEach((
+            int entityInQueryIndex,
+            ref Entity AiEntity,
+            in Translation translationComponent) =>
+            {
+
+                //var worldEntity = GetSingletonEntity<SectionWorldTag>();
+                //var map = GetBuffer<SectionWorldGrid>(worldEntity);
+                
+            }).ScheduleParallel();
+        m_ECBSystem.AddJobHandleForProducer(Dependency);
     }
 
 }
