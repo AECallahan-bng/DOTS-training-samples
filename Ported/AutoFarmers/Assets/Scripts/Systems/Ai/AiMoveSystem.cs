@@ -12,7 +12,7 @@ public class AiMoveSystem : SystemBase
     protected override void OnUpdate()
     {
 		float deltaTime = Time.DeltaTime;
-        Entities.ForEach((ref AiPosition currentPosition, in AiTargetCell moveTarget) => {
+        Entities.ForEach((ref Translation currentPosition, in AiTargetCell moveTarget) => {
 			float2 direction = new float2(moveTarget.CellCoords.x, moveTarget.CellCoords.y) - new float2(currentPosition.Value.x, currentPosition.Value.z);
 
 			if (direction.x > direction.y)
