@@ -78,9 +78,18 @@ public class AiAssignCommandSystem : SystemBase
 		Dependency = JobHandle.CombineDependencies(Dependency, tilledLandJobHandle);
 		Dependency = JobHandle.CombineDependencies(Dependency, untilledLandJobHandle);
 
-		var commandBuffer = _commandBufferSystem.CreateCommandBuffer().ToConcurrent();
+		var commandBuffer = _commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
-		Entities.WithAll<AiTagCommandIdle>().ForEach((int entityInQueryIndex, Entity aiEntity, ref Translation aiPosition) => {
+		Entities
+			.WithDisposeOnCompletion(rocks)
+			.WithDisposeOnCompletion(crops)
+			.WithDisposeOnCompletion(tilledLand)
+			.WithDisposeOnCompletion(untilledLand)
+			.WithAll<AiTagCommandIdle>().
+			ForEach((
+				int entityInQueryIndex, 
+				Entity aiEntity, 
+				ref Translation aiPosition) => {
 
 			int2 aiCellPosition = new int2((int)aiPosition.Value.x, (int)aiPosition.Value.z);
 			AiCommands closestType = AiCommands.Idle;
