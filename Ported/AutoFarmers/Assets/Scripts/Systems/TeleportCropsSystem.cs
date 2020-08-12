@@ -23,8 +23,7 @@ public class TeleportCropsSystem : SystemBase
             int entityInQueryIndex,
             Entity cropEntity,
             ref Translation translationComponent, 
-            ref NonUniformScale scaleComponent,
-            ref CropSellingTag cropSellingComponent) => 
+            ref NonUniformScale scaleComponent) => 
         {
             translationComponent.Value.y += delta * speed;
             
