@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
-public struct CellPosition : IComponentData
+[Serializable]
+public struct CellTagPlantedGround : IComponentData
 {
-	public int2 Value;
 }

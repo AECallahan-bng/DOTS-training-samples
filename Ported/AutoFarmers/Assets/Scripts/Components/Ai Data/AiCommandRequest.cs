@@ -3,7 +3,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
-enum AiCommands
+public enum AiCommands
 {
 	Idle,
 	Pick,
@@ -17,7 +17,7 @@ enum AiCommands
 [Serializable]
 public struct AiCommandRequest : IComponentData
 {
-	Entity RequestedAi;
-	int2 TargetPosition;
-	AiCommands CommandType;
+	public Entity RequestedAi;
+	public int2 TargetPosition;
+	public AiCommands CommandType;
 }
