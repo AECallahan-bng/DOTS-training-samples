@@ -293,3 +293,9 @@ MonoBehaviour:
   Farmer: {fileID: 9160222723988273112, guid: 75ba41f36a87b634cb86b6dfb559def9, type: 3}
   Drone: {fileID: 3436580951478277971, guid: aa0f933c836f8bc4e9c8a681b373269e, type: 3}
   Crop: {fileID: 4380368219053932973, guid: d3b4abb3cd8bb554bbca43d769ab6052, type: 3}
+  CellSize:
+    x: 1
+    y: 1
+  Seed: 38131395
+  TeleporterCount: 20
+  Rockthreshold: 0.5
