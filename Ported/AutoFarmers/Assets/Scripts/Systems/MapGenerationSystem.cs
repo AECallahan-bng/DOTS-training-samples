@@ -38,6 +38,7 @@ public class MapGenerationSystem : SystemBase
 
                 var cell = ecb.CreateEntity();
                 ecb.AddComponent<CellTagUntilledGround>(cell);
+                ecb.AddComponent(cell, new CellPosition { Value = new int2(x,y) });
                 ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
                 ecb.AddComponent(cell, new Translation() { Value = new float3(x * content.CellSize.x, 0, y * content.CellSize.y) });
                 ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
@@ -93,6 +94,7 @@ public class MapGenerationSystem : SystemBase
 
                         var cell = ecb.CreateEntity();
                         ecb.AddComponent(cell, new RockHealth { Value = 10 });
+                        ecb.AddComponent(cell, new CellPosition { Value = pos });
                         ecb.AddComponent(cell, new Unity.Transforms.LocalToWorld() { Value = float4x4.identity });
                         ecb.AddComponent(cell, new Unity.Transforms.Translation() { Value = new float3(x * content.CellSize.x, 0, y * content.CellSize.y) });
                         ecb.AddComponent(cell, new Unity.Transforms.Rotation() { Value = quaternion.identity });
@@ -133,6 +135,7 @@ public class MapGenerationSystem : SystemBase
 
                     var cell = ecb.CreateEntity();
                     ecb.AddComponent<CellTagTeleporter>(cell);
+                    ecb.AddComponent(cell, new CellPosition { Value = pos });
                     ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
                     ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
                     ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
