@@ -16,32 +16,35 @@ public class MapGenerationSystem : SystemBase
     {
     }
 
-
+    
 
     protected void GenerateEmpty(EntityCommandBuffer ecb)
     {
 
-        Entities.ForEach((in GridSize size) =>
-        {
-            var map = ecb.CreateEntity();
-            var dataEntities = ecb.AddBuffer<SectionWorldGrid>(map);
-            var dataCollisions = ecb.AddBuffer<SectionWorldCollision>(map);
+        var size = GetSingleton<GridSize>();
+        var content = GetSingleton<FarmContent>();
+        var map = ecb.CreateEntity();
+        var dataEntities = ecb.AddBuffer<SectionWorldGrid>(map);
+        var dataCollisions = ecb.AddBuffer<SectionWorldCollision>(map);
 
-            for (int y = 0; y != size.Height; ++y)
+        for (int y = 0; y != size.Height; ++y)
+        {
+            for (int x = 0; x != size.Width; ++x)
             {
-                for (int x = 0; x != size.Width; ++x)
-                {
-                    var cell = ecb.CreateEntity();
-                    ecb.AppendToBuffer(map, new SectionWorldGrid { Value = cell });
-                    ecb.AppendToBuffer(map, new SectionWorldCollision { Blocked = false });
-                }
+                
+                //var cell = ecb.CreateEntity();
+                var cell = ecb.Instantiate(content.UntilledLand);
+                ecb.SetComponent(cell, new Unity.Transforms.Translation() { Value = new float3(x * 1, 0, y * 1) });
+                ecb.AddComponent<CellTagUntilledGround>(cell);
+                ecb.AppendToBuffer(map, new SectionWorldGrid { Value = cell });
+                ecb.AppendToBuffer(map, new SectionWorldCollision { Blocked = false });
             }
-        }).Run();
+        }
     }
     void GenerateTeleporters(EntityCommandBuffer ecb, int count)
     {
         var size = GetSingleton<GridSize>();
-        //GridSize size, DynamicBuffer<SectionWorldCollision> collision, DynamicBuffer< SectionWorldGrid > map
+        var content = GetSingleton<FarmContent>();
         Entities.ForEach((DynamicBuffer<SectionWorldCollision> collision, DynamicBuffer<SectionWorldGrid> map) =>
         {
 
@@ -54,14 +57,18 @@ public class MapGenerationSystem : SystemBase
                 var posI = PosToIndex(size2, pos);
                 if (!collision[posI].Blocked)
                 {
+                    ecb.DestroyEntity(map[posI].Value);
+                    var cell = ecb.Instantiate(content.Teleporter);
+                    ecb.SetComponent(cell, new Unity.Transforms.Translation() { Value = new float3(pos.x * 1, 0, pos.y * 1) });
+                    ecb.AddComponent<CellTagTeleporter>(cell);
+                    map[posI] = new SectionWorldGrid { Value = cell };
                     collision[posI] = new SectionWorldCollision { Blocked = true };
-                    ecb.AddComponent<CellTagTeleporter>(map[posI].Value);
                     ++i;
                 }
             }
         }).Run();
-
     }
+    
     protected override void OnUpdate()
     {
 
