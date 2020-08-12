@@ -7,5 +7,5 @@ using Unity.Mathematics;
 [GenerateAuthoringComponent]
 public struct CropGrowth : IComponentData
 {
-	float Value;
+	public float Value;
 }
