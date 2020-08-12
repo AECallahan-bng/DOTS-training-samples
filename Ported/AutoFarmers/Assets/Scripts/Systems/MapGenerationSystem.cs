@@ -18,7 +18,46 @@ public class MapGenerationSystem : SystemBase
     {
     }
 
-    
+    internal static void DestroySectionCell(EntityCommandBuffer ecb,
+        FarmContent content,
+        GridSize size,
+        DynamicBuffer<SectionWorldGrid> sectionGrid, 
+        int2 pos)
+    {
+        var posI = PosToIndex(new int2(size.Width, size.Height), pos);
+        ecb.DestroyEntity(sectionGrid[posI].Value);
+        sectionGrid[posI] = new SectionWorldGrid { Value = Entity.Null };
+    }
+
+    internal static void SetSectionCellRock(EntityCommandBuffer ecb,
+        FarmContent content,
+        GridSize size,
+        DynamicBuffer<SectionWorldGrid> sectionGrid, 
+        DynamicBuffer<SectionWorldCollision> sectionCollision, 
+        int2 pos)
+    {
+        
+
+        var posI = PosToIndex(new int2(size.Width, size.Height), pos);
+        ecb.DestroyEntity(sectionGrid[posI].Value);
+
+        var cell = ecb.CreateEntity();
+        ecb.AddComponent(cell, new RockHealth { Value = 10 });
+        ecb.AddComponent(cell, new CellPosition { Value = pos });
+        ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
+        ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
+        ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
+        ecb.AddBuffer<Child>(cell);
+
+        var cellRock = ecb.Instantiate(content.Rock);
+        ecb.AddComponent(cellRock, new Parent { Value = cell });
+        ecb.AddComponent(cellRock, new LocalToParent { Value = float4x4.identity });
+        ecb.AddComponent(cellRock, new LocalToWorld { Value = float4x4.identity });
+        ecb.AppendToBuffer(cell, new Child() { Value = cellRock });
+
+        sectionGrid[posI] = new SectionWorldGrid { Value = cell };
+        sectionCollision[posI] = new SectionWorldCollision { Blocked = true };
+    }
 
     protected void GenerateEmpty(EntityCommandBuffer ecb)
     {
@@ -89,25 +128,7 @@ public class MapGenerationSystem : SystemBase
                     var posI = PosToIndex(size2, pos);
                     if (noise[y * size.Width + x] > content.Rockthreshold && !collision[posI].Blocked)
                     {
-
-                        ecb.DestroyEntity(map[posI].Value);
-
-                        var cell = ecb.CreateEntity();
-                        ecb.AddComponent(cell, new RockHealth { Value = 10 });
-                        ecb.AddComponent(cell, new CellPosition { Value = pos });
-                        ecb.AddComponent(cell, new Unity.Transforms.LocalToWorld() { Value = float4x4.identity });
-                        ecb.AddComponent(cell, new Unity.Transforms.Translation() { Value = new float3(x * content.CellSize.x, 0, y * content.CellSize.y) });
-                        ecb.AddComponent(cell, new Unity.Transforms.Rotation() { Value = quaternion.identity });
-                        ecb.AddBuffer<Child>(cell);
-
-                        var cellRock = ecb.Instantiate(content.Rock);
-                        ecb.AddComponent(cellRock, new Unity.Transforms.Parent { Value = cell });
-                        ecb.AddComponent(cellRock, new Unity.Transforms.LocalToParent { Value = float4x4.identity });
-                        ecb.AddComponent(cellRock, new Unity.Transforms.LocalToWorld { Value = float4x4.identity });
-                        ecb.AppendToBuffer(cell, new Child() { Value = cellRock });
-
-                        map[posI] = new SectionWorldGrid { Value = cell };
-                        collision[posI] = new SectionWorldCollision { Blocked = true };
+                        SetSectionCellRock(ecb, content, size, map, collision, pos);
 
                     }
                 }
