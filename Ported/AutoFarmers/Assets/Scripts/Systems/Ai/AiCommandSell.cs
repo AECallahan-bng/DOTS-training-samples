@@ -9,47 +9,44 @@ public class AiCommandSell : SystemBase
     protected override void OnCreate()
     {
         m_ECBSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
-    }
+	}
     protected override void OnUpdate()
     {
         var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
 
-        var query = GetEntityQuery(typeof(SectionWorldGrid));
-        var buffer = GetBuffer<SectionWorldGrid>(query.GetSingletonEntity());
-        var size = GetSingleton<GridSize>();
-        int2 sizeInt = new int2(size.Width, size.Height);
+		if (HasSingleton<SectionWorldTag>())
+		{
+			var query = GetEntityQuery(typeof(SectionWorldTag));
+			var buffer = GetBuffer<SectionWorldGrid>(query.GetSingletonEntity());
+			var size = GetSingleton<GridSize>();
+			int2 sizeInt = new int2(size.Width, size.Height);
 
-        var droneResources = GetSingleton<DroneResources>();
-        var farmerResources = GetSingleton<FarmerResources>();
-        var farmResourcesEntity = GetSingletonEntity<DroneResources>();
+			Entities
+				.WithAll<AiTagCommandSell>()
+				.WithNativeDisableParallelForRestriction(buffer)
+				.ForEach((
+				int entityInQueryIndex,
+				ref Entity carrierEntity,
+				ref AiCarriedObject carriedObjectComponent,
+				in Translation translationComponent) =>
+			{
+				int2 pos = new int2((int)translationComponent.Value.x, (int)translationComponent.Value.z);
 
-        Entities
-            .WithAll<AiTagCommandSell>()
-            .ForEach((
-            int entityInQueryIndex, 
-            ref Entity carrierEntity, 
-            ref AiCarriedObject carriedObjectComponent, 
-            in Translation translationComponent) => 
-        {
-            int2 pos = new int2((int)translationComponent.Value.x, (int)translationComponent.Value.z);
+				Entity entityInPos = buffer[PosToIndex(sizeInt, pos)].Value;
 
-            Entity entityInPos = buffer[PosToIndex(sizeInt, pos)].Value;
+				if (HasComponent<CellTagTeleporter>(entityInPos))
+				{
+					ecb.AddComponent<CropSellingTag>(entityInQueryIndex, carriedObjectComponent.CarriedObjectEntity);
+					ecb.RemoveComponent<AiCarriedObject>(entityInQueryIndex, carrierEntity);
 
-            if(HasComponent<CellTagTeleporter>(entityInPos))
-            {
-                ecb.AddComponent<CropSellingTag>(entityInQueryIndex, carriedObjectComponent.CarriedObjectEntity);
-                ecb.RemoveComponent<AiCarriedObject>(entityInQueryIndex, carrierEntity);
+					Entity transaction = ecb.CreateEntity(entityInQueryIndex);
+					ecb.AddComponent<SellTransaction>(entityInQueryIndex, transaction, new SellTransaction() { Resources = 1, GridPosition = pos });
 
-                droneResources.Resources++;
-                farmerResources.Resources++;
-
-                ecb.SetComponent(entityInQueryIndex, farmResourcesEntity, droneResources);
-                ecb.SetComponent(entityInQueryIndex, farmResourcesEntity, farmerResources);
-
-                ecb.RemoveComponent<AiTagCommandSell>(entityInQueryIndex, carrierEntity);
-                ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, carrierEntity);                
-            }
-        }).ScheduleParallel();
+					ecb.RemoveComponent<AiTagCommandSell>(entityInQueryIndex, carrierEntity);
+					ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, carrierEntity);
+				}
+			}).ScheduleParallel();
+		}
 
         m_ECBSystem.AddJobHandleForProducer(Dependency);
     }

@@ -24,6 +24,7 @@ public class MapGenerationSystem : SystemBase
         var size = GetSingleton<GridSize>();
         var content = GetSingleton<FarmContent>();
         var map = ecb.CreateEntity();
+		ecb.AddComponent<SectionWorldTag>(map);
         var dataEntities = ecb.AddBuffer<SectionWorldGrid>(map);
         var dataCollisions = ecb.AddBuffer<SectionWorldCollision>(map);
 
