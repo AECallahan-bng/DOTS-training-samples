@@ -29,6 +29,9 @@ public class SpawnFarmersSystem : SystemBase
 
 				var farmerEntity = ecb.Instantiate(farmContent.Farmer);
 				ecb.SetComponent(farmerEntity, new Unity.Transforms.Translation() { Value = spawnPosition });
+				ecb.AddComponent<AiTagFarmer>(farmerEntity);
+				ecb.AddComponent<AiTagCommandIdle>(farmerEntity);
+				ecb.AddComponent<AiTargetCell>(farmerEntity);
 
 				newResources -= farmerCost.Value;
 			}

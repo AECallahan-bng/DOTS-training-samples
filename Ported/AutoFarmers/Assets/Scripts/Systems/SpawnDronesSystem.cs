@@ -18,7 +18,10 @@ public class SpawnDronesSystem : SystemBase
 			{
 				for (int i = 0; i < droneCost.SpawnCount; i++)
 				{
-					ecb.Instantiate(farmContent.Drone);
+					Entity droneEntity = ecb.Instantiate(farmContent.Drone);
+					ecb.AddComponent<AiTagDrone>(droneEntity);
+					ecb.AddComponent<AiTagCommandIdle>(droneEntity);
+					ecb.AddComponent<AiTargetCell>(droneEntity);
 				}
 				newResources -= droneCost.Cost;
 			}
