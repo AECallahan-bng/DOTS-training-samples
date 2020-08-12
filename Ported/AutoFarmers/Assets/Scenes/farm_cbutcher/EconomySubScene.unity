@@ -160,7 +160,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 661e1d49fa89db04fb2788f05ce78246, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Value: 0
+  Resources: 43
+  LastGridPosition:
+    x: 0
+    y: 0
 --- !u!114 &311270159
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -173,7 +176,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0df82dfeaa1bb6644902e3ce69bac410, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Value: 0
+  Resources: 0
+  LastGridPosition:
+    x: 0
+    y: 0
 --- !u!114 &311270160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -252,7 +258,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7655a2f1e2fb6cc4b9758b40cb45e0e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Value: 50
+  Cost: 50
+  SpawnCount: 5
 --- !u!4 &311270166
 Transform:
   m_ObjectHideFlags: 0
@@ -279,10 +286,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cef2f6adefc6468458ea16a7c8da526e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UntilledLand: {fileID: 0}
-  TilledLand: {fileID: 0}
-  Rock: {fileID: 0}
-  Teleporter: {fileID: 0}
-  Farmer: {fileID: 0}
-  Drone: {fileID: 0}
-  Crop: {fileID: 0}
+  UntilledLand: {fileID: 7385759237028287839, guid: 025412c33156f8646beed45bcab3eb68, type: 3}
+  TilledLand: {fileID: 7385759237028287839, guid: 6d018b5c31ff6714ca158f4a6717f13f, type: 3}
+  Rock: {fileID: 3365121165665584345, guid: 3becd72ab1e6d7849a17108ad1454a5c, type: 3}
+  Teleporter: {fileID: 5247446534602034440, guid: f70abc7a2c98b8b41afea2d9f2bcd851, type: 3}
+  Farmer: {fileID: 9160222723988273112, guid: 75ba41f36a87b634cb86b6dfb559def9, type: 3}
+  Drone: {fileID: 3436580951478277971, guid: aa0f933c836f8bc4e9c8a681b373269e, type: 3}
+  Crop: {fileID: 4380368219053932973, guid: d3b4abb3cd8bb554bbca43d769ab6052, type: 3}
