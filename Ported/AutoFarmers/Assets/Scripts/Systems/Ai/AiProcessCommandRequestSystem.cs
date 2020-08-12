@@ -22,7 +22,7 @@ public class AiProcessCommandRequestPostSystem : SystemBase
 
 	protected override void OnUpdate()
 	{
-		var commandBuffer = _entityCommandBufferSystem.CreateCommandBuffer().ToConcurrent();
+		var commandBuffer = _entityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 		// now process the requests
 		Entities.ForEach((int entityInQueryIndex, Entity aiEntity, ref AiCommandRequest request) => {
 			commandBuffer.DestroyEntity(entityInQueryIndex, aiEntity);

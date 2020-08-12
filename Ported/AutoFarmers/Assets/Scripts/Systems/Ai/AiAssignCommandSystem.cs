@@ -78,9 +78,18 @@ public class AiAssignCommandSystem : SystemBase
 		Dependency = JobHandle.CombineDependencies(Dependency, tilledLandJobHandle);
 		Dependency = JobHandle.CombineDependencies(Dependency, untilledLandJobHandle);
 
-		var commandBuffer = _commandBufferSystem.CreateCommandBuffer().ToConcurrent();
+		var commandBuffer = _commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
-		Entities.WithAll<AiTagCommandIdle>().ForEach((int entityInQueryIndex, Entity aiEntity, ref Translation aiPosition) => {
+		Entities
+			.WithDisposeOnCompletion(rocks)
+			.WithDisposeOnCompletion(crops)
+			.WithDisposeOnCompletion(tilledLand)
+			.WithDisposeOnCompletion(untilledLand)
+			.WithAll<AiTagCommandIdle>().
+			ForEach((
+				int entityInQueryIndex, 
+				Entity aiEntity, 
+				ref Translation aiPosition) => {
 
 			int2 aiCellPosition = new int2((int)aiPosition.Value.x, (int)aiPosition.Value.z);
 			AiCommands closestType = AiCommands.Idle;
@@ -94,8 +103,12 @@ public class AiAssignCommandSystem : SystemBase
 				selectedCommand = AiCommands.Pick;
 				closestPosition = crops[closestCropIndex].Value;
 			}
-			closestType = AiCommands.Pick;
-			closestDistanceSq = closestCropDistanceSq;
+
+			if (closestCropIndex != -1)
+			{
+				closestType = AiCommands.Pick;
+				closestDistanceSq = closestCropDistanceSq;
+			}
 
 			if (selectedCommand == AiCommands.Idle)
 			{
@@ -160,14 +173,14 @@ public class AiAssignCommandSystem : SystemBase
 	static void FindClosestCell(ref NativeArray<CellPosition> cells, ref int2 testPosition, out int closestIndex, out float closestDistanceSq)
 	{
 		closestDistanceSq = float.MaxValue;
-		closestIndex = 0;
+		closestIndex = -1;
 		for (int cellIndex = 0; cellIndex < cells.Length; cellIndex++)
 		{
 			int2 deltaPosition = cells[cellIndex].Value - testPosition;
 			float distanceSq = deltaPosition.x * deltaPosition.x + deltaPosition.y * deltaPosition.y;
 			if (distanceSq < closestDistanceSq)
 			{
-				distanceSq = closestDistanceSq;
+				closestDistanceSq = distanceSq;
 				closestIndex = cellIndex;
 			}
 		}
