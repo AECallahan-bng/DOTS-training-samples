@@ -96,6 +96,7 @@ public class AiAssignCommandSystem : SystemBase
 			AiCommands selectedCommand = AiCommands.Idle;
 			int2 closestPosition = default;
 			float closestDistanceSq = float.MaxValue;
+			bool IsFarmer = HasComponent<AiTagFarmer>(aiEntity);		// PERF: Could test this on a per-chunk basis if we use IJobChunk
 
 			AiAssignCommandSystem.FindClosestCell(ref crops, ref aiCellPosition, out int closestCropIndex, out float closestCropDistanceSq);
 			if (closestCropDistanceSq < cAutoCropDistance * cAutoCropDistance)
@@ -110,7 +111,7 @@ public class AiAssignCommandSystem : SystemBase
 				closestDistanceSq = closestCropDistanceSq;
 			}
 
-			if (selectedCommand == AiCommands.Idle)
+			if (selectedCommand == AiCommands.Idle && IsFarmer)
 			{
 				AiAssignCommandSystem.FindClosestCell(ref rocks, ref aiCellPosition, out int closestRockIndex, out float closestRockDistanceSq);
 				if (closestRockDistanceSq < cAutoRockDistance * cAutoRockDistance)
@@ -126,7 +127,7 @@ public class AiAssignCommandSystem : SystemBase
 				}
 			}
 
-			if (selectedCommand == AiCommands.Idle)
+			if (selectedCommand == AiCommands.Idle && IsFarmer)
 			{
 				AiAssignCommandSystem.FindClosestCell(ref tilledLand, ref aiCellPosition, out int closestTilledLandIndex, out float closestTilledLandDistanceSq);
 				if (closestTilledLandDistanceSq < cAutoPlantDistance * cAutoPlantDistance)
@@ -142,7 +143,7 @@ public class AiAssignCommandSystem : SystemBase
 				}
 			}
 
-			if (selectedCommand == AiCommands.Idle)
+			if (selectedCommand == AiCommands.Idle && IsFarmer)
 			{
 				AiAssignCommandSystem.FindClosestCell(ref untilledLand, ref aiCellPosition, out int closestUntilledLandIndex, out float closestUntilledLandDistanceSq);
 				if (closestUntilledLandDistanceSq < closestDistanceSq)
