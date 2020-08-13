@@ -39,14 +39,16 @@ public class AiCommandPickSystem : SystemBase
 
                 if (pos.Equals(targetCell.CellCoords))
                 {
+                    var childBuffer = GetBuffer<Child>(entityInPos);
+                    
                     ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, entityInPos);
+                    ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, entityInPos);
+                    ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, entityInPos);
 
                     ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
                     ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);
                     ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = entityInPos });
 
-                    //buffer[bufferIndex] = new SectionWorldGrid { Value = ecb.Instantiate(entityInQueryIndex, farmContent.TilledLand) };
-                    //ecb.SetComponent(entityInQueryIndex, buffer[bufferIndex].Value, translation);
                 }
             }).ScheduleParallel();
         }
