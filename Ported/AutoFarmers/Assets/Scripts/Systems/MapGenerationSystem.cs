@@ -22,6 +22,20 @@ public class MapGenerationSystem : SystemBase
     {
         return new float3(cellPos.x * cellSize.x, 0, cellPos.y * cellSize.y);
     }
+    static internal float3 RockOffset
+    {
+        get
+        {
+            return new float3(0, 0.5f, 0);
+        }
+    }
+    static internal float3 TeleporterOffset
+    {
+        get
+        {
+            return new float3(0, 1.5f, 0);
+        }
+    }
     protected override void OnCreate()
     {
     }
@@ -129,16 +143,17 @@ public class MapGenerationSystem : SystemBase
 					ecb.AddComponent<CellTagUntilledGround>(cell);
 				}
 				ecb.AddComponent(cell, new CellPosition { Value = new int2(x,y) });
+
                 ecb.AddComponent(cell, new Translation() { Value = CellToWorld( cellPos, content.CellSize) });
-                ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
+                //ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
 
                 //ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
                 //ecb.AddBuffer<Child>(cell);
 
 
                 var ground = ecb.Instantiate(content.GenerateTilled ? content.TilledLand : content.UntilledLand);
-                ecb.AddComponent(cell, new Translation() { Value = CellToWorld(cellPos, content.CellSize) });
-                ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
+                ecb.AddComponent(ground, new Translation() { Value = CellToWorld(cellPos, content.CellSize) });
+                //ecb.AddComponent(ground, new Rotation() { Value = quaternion.identity });
                 //ecb.AddComponent(cellLand, new Parent { Value = cell });
                 //ecb.AddComponent(cellLand, new LocalToParent { Value = float4x4.identity });
                 //ecb.AddComponent(cellLand, new LocalToWorld { Value = float4x4.identity });
@@ -206,8 +221,8 @@ public class MapGenerationSystem : SystemBase
 
 
                         var newOverE = ecb.Instantiate(content.Rock);
-                        ecb.AddComponent(newOverE, new Translation() { Value = CellToWorld(cellPos, content.CellSize) });
-                        ecb.AddComponent(newOverE, new Rotation() { Value = quaternion.identity });
+                        ecb.AddComponent(newOverE, new Translation() { Value = CellToWorld(cellPos, content.CellSize)+RockOffset});
+                        //ecb.AddComponent(newOverE, new Rotation() { Value = quaternion.identity });
 
                         if (HasComponent<Over>(cell))
                         {
@@ -264,8 +279,8 @@ public class MapGenerationSystem : SystemBase
 
 
                     var newOverE = ecb.Instantiate(content.Teleporter);
-                    ecb.AddComponent(newOverE, new Translation() { Value = CellToWorld(cellPos, content.CellSize) });
-                    ecb.AddComponent(newOverE, new Rotation() { Value = quaternion.identity });
+                    ecb.AddComponent(newOverE, new Translation() { Value = CellToWorld(cellPos, content.CellSize) + TeleporterOffset });
+                    //ecb.AddComponent(newOverE, new Rotation() { Value = quaternion.identity });
 
                     if (HasComponent<Over>(cell))
                     {
