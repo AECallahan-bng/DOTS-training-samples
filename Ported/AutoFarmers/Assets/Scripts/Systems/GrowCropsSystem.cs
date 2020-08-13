@@ -16,7 +16,12 @@ public class GrowCropsSystem : SystemBase
 
         var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
 
-        Entities.ForEach((int entityInQueryIndex, Entity cropEntity, ref CropGrowth growthComponent, ref NonUniformScale scale )=>
+        Entities.ForEach((
+            int entityInQueryIndex, 
+            Entity cropEntity, 
+            ref CropGrowth growthComponent, 
+            ref NonUniformScale scale,
+            in Parent parent)=>
         {
             float3 currentScale = scale.Value;
             currentScale.x = math.lerp(1, currentScale.x, math.clamp(growthComponent.Value, 0, 1));
@@ -29,7 +34,8 @@ public class GrowCropsSystem : SystemBase
                 //Remove cropGrowth
                 ecb.RemoveComponent<CropGrowth>(entityInQueryIndex, cropEntity);
                 //Add CellTagGrownCrop
-                ecb.AddComponent<CellTagGrownCrop>(entityInQueryIndex, cropEntity);
+                ecb.AddComponent<CellTagGrownCrop>(entityInQueryIndex, parent.Value);
+                ecb.AddComponent<FullGrownCropTag>(entityInQueryIndex, cropEntity);
             }
             scale.Value = currentScale;
         }).ScheduleParallel();
