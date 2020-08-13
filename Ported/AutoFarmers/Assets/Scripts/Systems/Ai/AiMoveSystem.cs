@@ -25,5 +25,14 @@ public class AiMoveSystem : SystemBase
 			}
 
 		}).ScheduleParallel();
-    }
+
+		var getTranslation = GetComponentDataFromEntity<Translation>(true);
+		Entities.ForEach((ref Translation currentPosition, in AiObjectBeingCarried beingCarried) =>
+		{
+			Translation carrierPosition = getTranslation[beingCarried.CarrierEntity];
+
+			currentPosition.Value = carrierPosition.Value + math.up() * 0.8f;
+		}).ScheduleParallel();
+
+	}
 }
