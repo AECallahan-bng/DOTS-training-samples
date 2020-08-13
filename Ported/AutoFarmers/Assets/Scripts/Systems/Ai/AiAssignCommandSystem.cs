@@ -9,6 +9,7 @@ public class AiAssignCommandSystem : SystemBase
 {
 	private EntityQuery _queryRocks;
 	private EntityQuery _queryCrops;
+	private EntityQuery _queryTeleporters;
 	private EntityQuery _queryTilledLand;
 	private EntityQuery _queryUntilledLand;
 	private AiProcessCommandRequestSystem _commandBufferSystem;
@@ -30,6 +31,17 @@ public class AiAssignCommandSystem : SystemBase
 		{
 			All = new ComponentType[] {
 				ComponentType.ReadOnly<CellTagGrownCrop>(),
+				ComponentType.ReadOnly<CellPosition>(),
+			},
+			None = new ComponentType[] {
+				ComponentType.ReadOnly<AssignedAi>(),
+			}
+		});
+
+		_queryTeleporters = GetEntityQuery(new EntityQueryDesc
+		{
+			All = new ComponentType[] {
+				ComponentType.ReadOnly<CellTagTeleporter>(),
 				ComponentType.ReadOnly<CellPosition>(),
 			},
 			None = new ComponentType[] {
@@ -70,11 +82,13 @@ public class AiAssignCommandSystem : SystemBase
 
 		NativeArray<CellPosition> rocks = _queryRocks.ToComponentDataArrayAsync<CellPosition>(Allocator.TempJob, out JobHandle rockJobHandle);
 		NativeArray<CellPosition> crops = _queryCrops.ToComponentDataArrayAsync<CellPosition>(Allocator.TempJob, out JobHandle cropJobHandle);
+		NativeArray<CellPosition> teleporters = _queryTeleporters.ToComponentDataArrayAsync<CellPosition>(Allocator.TempJob, out JobHandle teleporterJobHandle);
 		NativeArray<CellPosition> tilledLand = _queryTilledLand.ToComponentDataArrayAsync<CellPosition>(Allocator.TempJob, out JobHandle tilledLandJobHandle);
 		NativeArray<CellPosition> untilledLand = _queryUntilledLand.ToComponentDataArrayAsync<CellPosition>(Allocator.TempJob, out JobHandle untilledLandJobHandle);
 
 		Dependency = JobHandle.CombineDependencies(Dependency, rockJobHandle);
 		Dependency = JobHandle.CombineDependencies(Dependency, cropJobHandle);
+		Dependency = JobHandle.CombineDependencies(Dependency, teleporterJobHandle);
 		Dependency = JobHandle.CombineDependencies(Dependency, tilledLandJobHandle);
 		Dependency = JobHandle.CombineDependencies(Dependency, untilledLandJobHandle);
 
@@ -83,6 +97,7 @@ public class AiAssignCommandSystem : SystemBase
 		Entities
 			.WithDisposeOnCompletion(rocks)
 			.WithDisposeOnCompletion(crops)
+			.WithDisposeOnCompletion(teleporters)
 			.WithDisposeOnCompletion(tilledLand)
 			.WithDisposeOnCompletion(untilledLand)
 			.WithAll<AiTagCommandIdle>().
@@ -96,22 +111,38 @@ public class AiAssignCommandSystem : SystemBase
 			AiCommands selectedCommand = AiCommands.Idle;
 			int2 closestPosition = default;
 			float closestDistanceSq = float.MaxValue;
-			bool IsFarmer = HasComponent<AiTagFarmer>(aiEntity);		// PERF: Could test this on a per-chunk basis if we use IJobChunk
+			bool IsFarmer = HasComponent<AiTagFarmer>(aiEntity);        // PERF: Could test this on a per-chunk basis if we use IJobChunk
+			bool IsCarrying = HasComponent<AiCarriedObject>(aiEntity);
 
-			AiAssignCommandSystem.FindClosestCell(ref crops, ref aiCellPosition, out int closestCropIndex, out float closestCropDistanceSq);
-			if (closestCropDistanceSq < cAutoCropDistance * cAutoCropDistance)
+			if (selectedCommand == AiCommands.Idle && IsCarrying)
 			{
-				selectedCommand = AiCommands.Pick;
-				closestPosition = crops[closestCropIndex].Value;
+				AiAssignCommandSystem.FindClosestCell(ref teleporters, ref aiCellPosition, out int closestTeleporterIndex, out float closestTeleporterDistanceSq);
+
+				if (closestTeleporterIndex != -1)
+				{
+					selectedCommand = AiCommands.Sell;
+					closestPosition = teleporters[closestTeleporterIndex].Value;
+					closestDistanceSq = closestTeleporterDistanceSq;
+				}
 			}
 
-			if (closestCropIndex != -1)
+			if (selectedCommand == AiCommands.Idle && IsFarmer && !IsCarrying)
 			{
-				closestType = AiCommands.Pick;
-				closestDistanceSq = closestCropDistanceSq;
+				AiAssignCommandSystem.FindClosestCell(ref crops, ref aiCellPosition, out int closestCropIndex, out float closestCropDistanceSq);
+				if (closestCropDistanceSq < cAutoCropDistance * cAutoCropDistance)
+				{
+					selectedCommand = AiCommands.Pick;
+					closestPosition = crops[closestCropIndex].Value;
+				}
+
+				if (closestCropIndex != -1)
+				{
+					closestType = AiCommands.Pick;
+					closestDistanceSq = closestCropDistanceSq;
+				}
 			}
 
-			if (selectedCommand == AiCommands.Idle && IsFarmer)
+			if (selectedCommand == AiCommands.Idle && IsFarmer && !IsCarrying)
 			{
 				AiAssignCommandSystem.FindClosestCell(ref rocks, ref aiCellPosition, out int closestRockIndex, out float closestRockDistanceSq);
 				if (closestRockDistanceSq < cAutoRockDistance * cAutoRockDistance)
@@ -127,7 +158,7 @@ public class AiAssignCommandSystem : SystemBase
 				}
 			}
 
-			if (selectedCommand == AiCommands.Idle && IsFarmer)
+			if (selectedCommand == AiCommands.Idle && IsFarmer && !IsCarrying)
 			{
 				AiAssignCommandSystem.FindClosestCell(ref tilledLand, ref aiCellPosition, out int closestTilledLandIndex, out float closestTilledLandDistanceSq);
 				if (closestTilledLandDistanceSq < cAutoPlantDistance * cAutoPlantDistance)
@@ -143,7 +174,7 @@ public class AiAssignCommandSystem : SystemBase
 				}
 			}
 
-			if (selectedCommand == AiCommands.Idle && IsFarmer)
+			if (selectedCommand == AiCommands.Idle && IsFarmer && !IsCarrying)
 			{
 				AiAssignCommandSystem.FindClosestCell(ref untilledLand, ref aiCellPosition, out int closestUntilledLandIndex, out float closestUntilledLandDistanceSq);
 				if (closestUntilledLandDistanceSq < closestDistanceSq)

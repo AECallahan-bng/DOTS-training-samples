@@ -39,11 +39,11 @@ public class AiCommandPickSystem : SystemBase
             {
                 int2 pos = new int2((int)translation.Value.x, (int)translation.Value.z);
                 int bufferIndex = PosToIndex(sizeInt, targetCell.CellCoords);
-                Entity entityInPos = buffer[bufferIndex].Value;
+                Entity cellEntity = buffer[bufferIndex].Value;
 
                 if (pos.Equals(targetCell.CellCoords))
                 {
-                    var childBuffer = getChildBuffer[entityInPos];
+                    var childBuffer = getChildBuffer[cellEntity];
                     
                     for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
                     {
@@ -52,14 +52,12 @@ public class AiCommandPickSystem : SystemBase
                             Entity crop = childBuffer[childIndex].Value;
                             ecb.RemoveComponent<Parent>(entityInQueryIndex, crop);
                             ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
-                            ecb.AddComponent<AiObjectBeingCarried>(entityInQueryIndex, crop);
+                            ecb.AddComponent(entityInQueryIndex, crop, new AiObjectBeingCarried { CarrierEntity = aiEntity });
                         }
                     }
 
-                    ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, aiEntity);
-
-                    ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, aiEntity);
-                    ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, aiEntity);
+                    ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, cellEntity);
+                    ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, cellEntity);
 
                     ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
                     ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);

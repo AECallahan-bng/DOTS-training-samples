@@ -31,11 +31,11 @@ public class GrowCropsSystem : SystemBase
 
             if(growthComponent.Value <= 0)
             {
-                //Remove cropGrowth
                 ecb.RemoveComponent<CropGrowth>(entityInQueryIndex, cropEntity);
-                //Add CellTagGrownCrop
-                ecb.AddComponent<CellTagGrownCrop>(entityInQueryIndex, parent.Value);
-                ecb.AddComponent<FullGrownCropTag>(entityInQueryIndex, cropEntity);
+				ecb.AddComponent<FullGrownCropTag>(entityInQueryIndex, cropEntity);
+
+				ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, parent.Value);
+				ecb.AddComponent<CellTagGrownCrop>(entityInQueryIndex, parent.Value);
             }
             scale.Value = currentScale;
         }).ScheduleParallel();
