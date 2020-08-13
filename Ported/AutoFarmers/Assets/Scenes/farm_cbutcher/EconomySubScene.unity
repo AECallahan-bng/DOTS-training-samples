@@ -290,7 +290,7 @@ MonoBehaviour:
   TilledLand: {fileID: 7385759237028287839, guid: 6d018b5c31ff6714ca158f4a6717f13f, type: 3}
   Rock: {fileID: 3365121165665584345, guid: 3becd72ab1e6d7849a17108ad1454a5c, type: 3}
   Teleporter: {fileID: 5247446534602034440, guid: f70abc7a2c98b8b41afea2d9f2bcd851, type: 3}
-  Farmer: {fileID: 9160222723988273112, guid: 75ba41f36a87b634cb86b6dfb559def9, type: 3}
+  Farmer: {fileID: 2114950250518576790, guid: 75ba41f36a87b634cb86b6dfb559def9, type: 3}
   Drone: {fileID: 3436580951478277971, guid: aa0f933c836f8bc4e9c8a681b373269e, type: 3}
   Crop: {fileID: 4380368219053932973, guid: d3b4abb3cd8bb554bbca43d769ab6052, type: 3}
   CellSize:
