@@ -13,8 +13,9 @@ struct FarmContent : IComponentData
 	public Entity Farmer;
 	public Entity Drone;
 	public Entity Crop;
-	public Unity.Mathematics.int2 CellSize;
+	public Unity.Mathematics.float2 CellSize;
 	public uint Seed;
 	public int TeleporterCount;
+	public bool GenerateTilled;
 	public float Rockthreshold;
 }

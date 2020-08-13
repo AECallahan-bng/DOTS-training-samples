@@ -14,17 +14,21 @@ public class AiCommandClear : SystemBase
     {
 
         var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
-
+        var content = GetSingleton<FarmContent>();
         Entities
             .WithAll<AiTagCommandClear>()
             .ForEach((
             int entityInQueryIndex,
             ref Entity AiEntity,
+            in AiTargetCell targetCell,
             in Translation translationComponent) =>
             {
-
-                //var worldEntity = GetSingletonEntity<SectionWorldTag>();
-                //var map = GetBuffer<SectionWorldGrid>(worldEntity);
+                var curCellPosition = MapGenerationSystem.WorldToCell(translationComponent.Value, content.CellSize);
+                if(math.all(curCellPosition == targetCell.CellCoords))
+                {
+                    //we're at the rock, time to break it!
+                }
+                
                 
             }).ScheduleParallel();
         m_ECBSystem.AddJobHandleForProducer(Dependency);
