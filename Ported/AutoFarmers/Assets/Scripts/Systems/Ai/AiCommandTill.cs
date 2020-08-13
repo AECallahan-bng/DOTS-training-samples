@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using Unity.Collections;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
@@ -13,7 +14,7 @@ public class AiCommandTillSystem : SystemBase
 	{
 		if (HasSingleton<SectionWorldTag>())
 		{
-			var ecb = m_ECBSystem.CreateCommandBuffer();
+			var ecb = new EntityCommandBuffer(Allocator.Temp);
 
 			FarmContent farmContent = GetSingleton<FarmContent>();
 			Entity mapEntity = GetSingletonEntity<SectionWorldTag>();
@@ -38,8 +39,7 @@ public class AiCommandTillSystem : SystemBase
 
 				if (pos.Equals(targetCell.CellCoords))
 				{
-					Entity tilledLandEntity = ecb.Instantiate(farmContent.Teleporter);
-					ecb.AddComponent(tilledLandEntity, new CellTagTilledGround());
+					Entity tilledLandEntity = ecb.Instantiate(farmContent.TilledLand);
 
 					ecb.RemoveComponent<AiTagCommandPlant>(farmerEntity);
 					ecb.AddComponent<AiTagCommandIdle>(farmerEntity);
@@ -47,16 +47,19 @@ public class AiCommandTillSystem : SystemBase
 					int mapIndex = targetCell.CellCoords.y * gridSize.Width + targetCell.CellCoords.x;
 					DynamicBuffer<SectionWorldGrid> worldGrid = getWorldGrid[mapEntity];
 					Entity cellEntity = worldGrid[mapIndex].Value;
+					ecb.RemoveComponent<CellTagUntilledGround>(cellEntity);
+					ecb.AddComponent<CellTagTilledGround>(cellEntity);
 					DynamicBuffer<Child> childrenBuffer = getChildBuffer[cellEntity];
 					for (int childIndex = 0; childIndex < childrenBuffer.Length; ++childIndex)
 					{
 						ecb.RemoveComponent<LocalToParent>(childrenBuffer[childIndex].Value);
 					}
-					//ecb.AppendToBuffer(cellEntity, new Child { Value = tilledLandEntity });
+					ecb.AppendToBuffer(cellEntity, new Child { Value = tilledLandEntity });
 				}
 			}).Run();
 
-			m_ECBSystem.AddJobHandleForProducer(Dependency);
+			ecb.Playback(EntityManager);
+			ecb.Dispose();
 		}
     }
 }
