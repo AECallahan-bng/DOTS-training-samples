@@ -19,15 +19,12 @@ public class AiCommandTillSystem : SystemBase
 			FarmContent farmContent = GetSingleton<FarmContent>();
 			Entity mapEntity = GetSingletonEntity<SectionWorldTag>();
 			GridSize gridSize = GetSingleton<GridSize>();
-
-			var getChildBuffer = GetBufferFromEntity<Child>();
+			
 			var getWorldGrid = GetBufferFromEntity<SectionWorldGrid>();
 
 			Entities.WithAll<AiTagCommandTill>()
 				.WithNativeDisableContainerSafetyRestriction(getWorldGrid)
-				.WithNativeDisableParallelForRestriction(getChildBuffer)
 				.WithReadOnly(getWorldGrid)
-				.WithReadOnly(getChildBuffer)
 				.WithStructuralChanges()
 				.ForEach((
 				int entityInQueryIndex,
@@ -49,12 +46,13 @@ public class AiCommandTillSystem : SystemBase
 					Entity cellEntity = worldGrid[mapIndex].Value;
 					ecb.RemoveComponent<CellTagUntilledGround>(cellEntity);
 					ecb.AddComponent<CellTagTilledGround>(cellEntity);
-					DynamicBuffer<Child> childrenBuffer = getChildBuffer[cellEntity];
-					for (int childIndex = 0; childIndex < childrenBuffer.Length; ++childIndex)
+
+					Ground existingGround = GetComponent<Ground>(cellEntity);
+					if (existingGround.Value != Entity.Null)
 					{
-						ecb.RemoveComponent<LocalToParent>(childrenBuffer[childIndex].Value);
+						ecb.DestroyEntity(existingGround.Value);
 					}
-					ecb.AppendToBuffer(cellEntity, new Child { Value = tilledLandEntity });
+					ecb.SetComponent<Ground>(cellEntity, new Ground() { Value = tilledLandEntity });
 				}
 			}).Run();
 
