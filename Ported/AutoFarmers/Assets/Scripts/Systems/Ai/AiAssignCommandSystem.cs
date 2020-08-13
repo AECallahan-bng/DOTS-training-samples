@@ -77,7 +77,7 @@ public class AiAssignCommandSystem : SystemBase
     protected override void OnUpdate()
 	{
 		const float cAutoCropDistance = 10.0f;
-		const float cAutoRockDistance = 10.0f;
+		const float cAutoRockDistance = 4.0f;
 		const float cAutoPlantDistance = 10.0f;
 
 		NativeArray<CellPosition> rocks = _queryRocks.ToComponentDataArrayAsync<CellPosition>(Allocator.TempJob, out JobHandle rockJobHandle);
