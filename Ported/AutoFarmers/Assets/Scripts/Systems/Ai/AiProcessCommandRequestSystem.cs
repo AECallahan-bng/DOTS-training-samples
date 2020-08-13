@@ -44,39 +44,46 @@ public class AiProcessCommandRequestPostSystem : SystemBase
 			.WithDisposeOnCompletion(requests)
 			.ForEach((int entityInQueryIndex, Entity worldEntity, in SectionWorldTag worldTag) =>
 			{
+				var processedRequests = new NativeHashSet<int2>(requests.Length, Allocator.Temp);
+
 				for (int i = 0; i < requests.Length; i++)
 				{
 					commandBuffer.DestroyEntity(entityInQueryIndex, requestEntities[i]);
 
-					commandBuffer.RemoveComponent<AiTagCommandIdle>(entityInQueryIndex, requests[i].RequestedAi);
-					commandBuffer.SetComponent(entityInQueryIndex, requests[i].RequestedAi, new AiTargetCell
+					if (processedRequests.Add(requests[i].TargetPosition))
 					{
-						CellCoords = requests[i].TargetPosition
-					});
+						commandBuffer.RemoveComponent<AiTagCommandIdle>(entityInQueryIndex, requests[i].RequestedAi);
+						commandBuffer.SetComponent(entityInQueryIndex, requests[i].RequestedAi, new AiTargetCell
+						{
+							CellCoords = requests[i].TargetPosition
+						});
 
-					switch (requests[i].CommandType)
-					{
-						case AiCommands.Clear:
-							commandBuffer.AddComponent<AiTagCommandClear>(entityInQueryIndex, requests[i].RequestedAi);
-							break;
+						switch (requests[i].CommandType)
+						{
+							case AiCommands.Clear:
+								commandBuffer.AddComponent<AiTagCommandClear>(entityInQueryIndex, requests[i].RequestedAi);
+								break;
 
-						case AiCommands.Pick:
-							commandBuffer.AddComponent<AiTagCommandPick>(entityInQueryIndex, requests[i].RequestedAi);
-							break;
+							case AiCommands.Pick:
+								commandBuffer.AddComponent<AiTagCommandPick>(entityInQueryIndex, requests[i].RequestedAi);
+								break;
 
-						case AiCommands.Plant:
-							commandBuffer.AddComponent<AiTagCommandPlant>(entityInQueryIndex, requests[i].RequestedAi);
-							break;
+							case AiCommands.Plant:
+								commandBuffer.AddComponent<AiTagCommandPlant>(entityInQueryIndex, requests[i].RequestedAi);
+								break;
 
-						case AiCommands.Till:
-							commandBuffer.AddComponent<AiTagCommandTill>(entityInQueryIndex, requests[i].RequestedAi);
-							break;
+							case AiCommands.Till:
+								commandBuffer.AddComponent<AiTagCommandTill>(entityInQueryIndex, requests[i].RequestedAi);
+								break;
 
-						case AiCommands.Sell:
-							commandBuffer.AddComponent<AiTagCommandSell>(entityInQueryIndex, requests[i].RequestedAi);
-							break;
+							case AiCommands.Sell:
+								commandBuffer.AddComponent<AiTagCommandSell>(entityInQueryIndex, requests[i].RequestedAi);
+								break;
+						}
 					}
 				}
+
+				processedRequests.Dispose();
 			}
 		).ScheduleParallel();
 	

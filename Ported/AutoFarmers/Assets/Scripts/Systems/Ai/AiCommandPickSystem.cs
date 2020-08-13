@@ -24,10 +24,14 @@ public class AiCommandPickSystem : SystemBase
             int2 sizeInt = new int2(size.Width, size.Height);
 
             FarmContent farmContent = GetSingleton<FarmContent>();
+			var getChildBuffer = GetBufferFromEntity<Child>(true);
 
-            Entities.WithAll<AiTagCommandPick>()
-                .WithNativeDisableParallelForRestriction(buffer)
-                .ForEach((
+			Entities.WithAll<AiTagCommandPick>()
+				.WithNativeDisableParallelForRestriction(buffer)
+				.WithNativeDisableParallelForRestriction(getChildBuffer)
+				.WithReadOnly(buffer)
+				.WithReadOnly(getChildBuffer)
+				.ForEach((
                 int entityInQueryIndex,
                 ref Entity aiEntity,
                 in AiTargetCell targetCell,
@@ -39,16 +43,28 @@ public class AiCommandPickSystem : SystemBase
 
                 if (pos.Equals(targetCell.CellCoords))
                 {
-                    var childBuffer = GetBuffer<Child>(entityInPos);
-                    
-                    ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, entityInPos);
-                    ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, entityInPos);
-                    ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, entityInPos);
-
+                    var childBuffer = getChildBuffer[entityInPos];
+                    Entity tile = new Entity();
+                    Entity crop;
+                    for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
+                    {
+                        if (HasComponent<CellTagGrownCrop>(childBuffer[childIndex].Value))
+                        {
+                            crop = childBuffer[childIndex].Value;
+                            ecb.RemoveComponent<Parent>(entityInQueryIndex, crop);
+                            ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, crop);
+                            ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
+                        }
+                        else
+                        {
+                            tile = childBuffer[childIndex].Value;
+                            ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, tile);
+                            ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, tile);
+                        }
+                    }
                     ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
                     ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);
-                    ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = entityInPos });
-
+                    ecb.SetBuffer<Child>(entityInQueryIndex, tile);
                 }
             }).ScheduleParallel();
         }
