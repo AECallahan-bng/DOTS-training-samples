@@ -7,26 +7,27 @@ public class AiCommandTillSystem : SystemBase
     private EntityCommandBufferSystem m_ECBSystem;
     protected override void OnCreate()
     {
-        m_ECBSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
+        m_ECBSystem = World.GetExistingSystem<BeginInitializationEntityCommandBufferSystem>();
     }
     protected override void OnUpdate()
 	{
 		if (HasSingleton<SectionWorldTag>())
 		{
-			var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
+			var ecb = m_ECBSystem.CreateCommandBuffer();
 
 			FarmContent farmContent = GetSingleton<FarmContent>();
 			Entity mapEntity = GetSingletonEntity<SectionWorldTag>();
-			DynamicBuffer<SectionWorldGrid> worldGrid = GetBuffer<SectionWorldGrid>(mapEntity);
 			GridSize gridSize = GetSingleton<GridSize>();
 
-			var getChildBuffer = GetBufferFromEntity<Child>(true);
+			var getChildBuffer = GetBufferFromEntity<Child>();
+			var getWorldGrid = GetBufferFromEntity<SectionWorldGrid>();
 
 			Entities.WithAll<AiTagCommandTill>()
-				.WithNativeDisableContainerSafetyRestriction(worldGrid)
+				.WithNativeDisableContainerSafetyRestriction(getWorldGrid)
 				.WithNativeDisableParallelForRestriction(getChildBuffer)
-				.WithReadOnly(worldGrid)
+				.WithReadOnly(getWorldGrid)
 				.WithReadOnly(getChildBuffer)
+				.WithStructuralChanges()
 				.ForEach((
 				int entityInQueryIndex,
 				ref Entity farmerEntity,
@@ -37,22 +38,23 @@ public class AiCommandTillSystem : SystemBase
 
 				if (pos.Equals(targetCell.CellCoords))
 				{
-					Entity tilledLandEntity = ecb.Instantiate(entityInQueryIndex, farmContent.TilledLand);
-					ecb.AddComponent(entityInQueryIndex, tilledLandEntity, new CellTagTilledGround());
+					Entity tilledLandEntity = ecb.Instantiate(farmContent.Teleporter);
+					ecb.AddComponent(tilledLandEntity, new CellTagTilledGround());
 
-					ecb.RemoveComponent<AiTagCommandPlant>(entityInQueryIndex, farmerEntity);
-					ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, farmerEntity);
+					ecb.RemoveComponent<AiTagCommandPlant>(farmerEntity);
+					ecb.AddComponent<AiTagCommandIdle>(farmerEntity);
 
 					int mapIndex = targetCell.CellCoords.y * gridSize.Width + targetCell.CellCoords.x;
+					DynamicBuffer<SectionWorldGrid> worldGrid = getWorldGrid[mapEntity];
 					Entity cellEntity = worldGrid[mapIndex].Value;
 					DynamicBuffer<Child> childrenBuffer = getChildBuffer[cellEntity];
 					for (int childIndex = 0; childIndex < childrenBuffer.Length; ++childIndex)
 					{
-						ecb.DestroyEntity(entityInQueryIndex, childrenBuffer[childIndex].Value);
+						ecb.RemoveComponent<LocalToParent>(childrenBuffer[childIndex].Value);
 					}
-					ecb.AppendToBuffer(entityInQueryIndex, cellEntity, new Child { Value = tilledLandEntity });
+					//ecb.AppendToBuffer(cellEntity, new Child { Value = tilledLandEntity });
 				}
-			}).ScheduleParallel();
+			}).Run();
 
 			m_ECBSystem.AddJobHandleForProducer(Dependency);
 		}
