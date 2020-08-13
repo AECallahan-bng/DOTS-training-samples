@@ -48,23 +48,27 @@ public class AiCommandPickSystem : SystemBase
                     Entity crop;
                     for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
                     {
-                        if (HasComponent<CellTagGrownCrop>(childBuffer[childIndex].Value))
+                        if (HasComponent<FullGrownCropTag>(childBuffer[childIndex].Value))
                         {
                             crop = childBuffer[childIndex].Value;
                             ecb.RemoveComponent<Parent>(entityInQueryIndex, crop);
-                            ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, crop);
                             ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
                         }
                         else
                         {
                             tile = childBuffer[childIndex].Value;
-                            ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, tile);
-                            ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, tile);
                         }
                     }
+
+                    ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, aiEntity);
+
+                    ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, aiEntity);
+                    ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, aiEntity);
+
                     ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
                     ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);
-                    ecb.SetBuffer<Child>(entityInQueryIndex, tile);
+
+                    //ecb.SetBuffer<Child>(entityInQueryIndex, tile);
                 }
             }).ScheduleParallel();
         }
