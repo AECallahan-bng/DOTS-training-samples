@@ -44,7 +44,6 @@ public class AiCommandPickSystem : SystemBase
                 if (pos.Equals(targetCell.CellCoords))
                 {
                     var childBuffer = getChildBuffer[cellEntity];
-					var newChildBuffer = ecb.SetBuffer<Child>(entityInQueryIndex, cellEntity);
 
 					// iterate through all children of the cell, removing a fully-grown crop if we found one,
 					// and leaving all other children in the array (by adding them to the new DynamicBuffer that we
@@ -59,10 +58,6 @@ public class AiCommandPickSystem : SystemBase
 							ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
                             ecb.AddComponent(entityInQueryIndex, crop, new AiObjectBeingCarried { CarrierEntity = aiEntity });
                         }
-						else
-						{
-							newChildBuffer.Add(new Child() { Value = childBuffer[childIndex].Value });
-						}
                     }
 
                     ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, cellEntity);
