@@ -44,15 +44,27 @@ public class AiCommandPickSystem : SystemBase
                 if (pos.Equals(targetCell.CellCoords))
                 {
                     var childBuffer = getChildBuffer[entityInPos];
-                    
-                    ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, entityInPos);
-                    ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, entityInPos);
-                    ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, entityInPos);
-
+                    Entity tile = new Entity();
+                    Entity crop;
+                    for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
+                    {
+                        if (HasComponent<CellTagGrownCrop>(childBuffer[childIndex].Value))
+                        {
+                            crop = childBuffer[childIndex].Value;
+                            ecb.RemoveComponent<Parent>(entityInQueryIndex, crop);
+                            ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, crop);
+                            ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
+                        }
+                        else
+                        {
+                            tile = childBuffer[childIndex].Value;
+                            ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, tile);
+                            ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, tile);
+                        }
+                    }
                     ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
                     ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);
-                    ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = entityInPos });
-
+                    ecb.SetBuffer<Child>(entityInQueryIndex, tile);
                 }
             }).ScheduleParallel();
         }
