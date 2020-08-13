@@ -156,10 +156,11 @@ public class MapGenerationSystem : SystemBase
                     var cell = map[posI].Value;
                     // retag cell
                     ecb.RemoveComponent<RockHealth>(cell);
-                    ecb.RemoveComponent<CellTagTilledGround>(cell);
-                    ecb.RemoveComponent<CellTagPlantedGround>(cell);
+					ecb.RemoveComponent<CellTagTilledGround>(cell);
+					ecb.RemoveComponent<CellTagUntilledGround>(cell);
+					ecb.RemoveComponent<CellTagPlantedGround>(cell);
                     ecb.RemoveComponent<CellTagGrownCrop>(cell);
-                    ecb.AddComponent< CellTagTeleporter>(cell);
+                    ecb.AddComponent<CellTagTeleporter>(cell);
 
 
                     var newOverE = ecb.Instantiate(content.Teleporter);

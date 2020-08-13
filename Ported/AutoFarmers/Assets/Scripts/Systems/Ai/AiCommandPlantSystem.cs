@@ -38,8 +38,8 @@ public class AiCommandPlantSystem : SystemBase
                 if (pos.Equals(targetCell.CellCoords))
                 {
                     Entity cropEntity = ecb.Instantiate(entityInQueryIndex, farmContent.Crop);
-                    ecb.AddComponent(entityInQueryIndex, cropEntity, new CropGrowth { Value = 5 });
-                    ecb.SetComponent(entityInQueryIndex, cropEntity, translation);
+                    ecb.AddComponent(entityInQueryIndex, cropEntity, new CropGrowth { Value = 1 });
+                    ecb.SetComponent(entityInQueryIndex, cropEntity, GetComponent<Translation>(cellEntity));
 
                     ecb.AddComponent(entityInQueryIndex, cellEntity, new Over { Value = cropEntity });
 

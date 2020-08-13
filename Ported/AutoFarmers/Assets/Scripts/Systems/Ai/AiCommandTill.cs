@@ -38,7 +38,7 @@ public class AiCommandTillSystem : SystemBase
 				{
 					Entity tilledLandEntity = ecb.Instantiate(farmContent.TilledLand);
 
-					ecb.RemoveComponent<AiTagCommandPlant>(farmerEntity);
+					ecb.RemoveComponent<AiTagCommandTill>(farmerEntity);
 					ecb.AddComponent<AiTagCommandIdle>(farmerEntity);
 
 					int mapIndex = targetCell.CellCoords.y * gridSize.Width + targetCell.CellCoords.x;
