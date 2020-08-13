@@ -27,7 +27,7 @@ public class AiCommandPickSystem : SystemBase
 			FarmContent farmContent = GetSingleton<FarmContent>();
 
 			Entities.WithAll<AiTagCommandPick>()
-				.WithNativeDisableParallelForRestriction(buffer)
+				.WithNativeDisableContainerSafetyRestriction(buffer)
 				.ForEach((
 				int entityInQueryIndex,
 				ref Entity aiEntity,
