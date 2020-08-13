@@ -11,8 +11,6 @@ public class AiCommandTillSystem : SystemBase
     }
     protected override void OnUpdate()
 	{
-		UnityEngine.Debug.Log("Running Command Till");
-
 		if (HasSingleton<SectionWorldTag>())
 		{
 			var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
@@ -24,7 +22,12 @@ public class AiCommandTillSystem : SystemBase
 
 			var getChildBuffer = GetBufferFromEntity<Child>(true);
 
-			Entities.WithAll<AiTagCommandTill>().WithNativeDisableContainerSafetyRestriction(worldGrid).WithReadOnly(worldGrid).ForEach((
+			Entities.WithAll<AiTagCommandTill>()
+				.WithNativeDisableContainerSafetyRestriction(worldGrid)
+				.WithNativeDisableParallelForRestriction(getChildBuffer)
+				.WithReadOnly(worldGrid)
+				.WithReadOnly(getChildBuffer)
+				.ForEach((
 				int entityInQueryIndex,
 				ref Entity farmerEntity,
 				in AiTargetCell targetCell,

@@ -24,10 +24,14 @@ public class AiCommandPickSystem : SystemBase
             int2 sizeInt = new int2(size.Width, size.Height);
 
             FarmContent farmContent = GetSingleton<FarmContent>();
+			var getChildBuffer = GetBufferFromEntity<Child>(true);
 
-            Entities.WithAll<AiTagCommandPick>()
-                .WithNativeDisableParallelForRestriction(buffer)
-                .ForEach((
+			Entities.WithAll<AiTagCommandPick>()
+				.WithNativeDisableParallelForRestriction(buffer)
+				.WithNativeDisableParallelForRestriction(getChildBuffer)
+				.WithReadOnly(buffer)
+				.WithReadOnly(getChildBuffer)
+				.ForEach((
                 int entityInQueryIndex,
                 ref Entity aiEntity,
                 in AiTargetCell targetCell,
@@ -39,7 +43,7 @@ public class AiCommandPickSystem : SystemBase
 
                 if (pos.Equals(targetCell.CellCoords))
                 {
-                    var childBuffer = GetBuffer<Child>(entityInPos);
+                    var childBuffer = getChildBuffer[entityInPos];
                     
                     ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, entityInPos);
                     ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, entityInPos);
