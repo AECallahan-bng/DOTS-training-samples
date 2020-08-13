@@ -39,7 +39,7 @@ public class AiCommandPlantSystem : SystemBase
                 {
                     Entity cropEntity = ecb.Instantiate(entityInQueryIndex, farmContent.Crop);
                     ecb.AddComponent(entityInQueryIndex, cropEntity, new CropGrowth { Value = 5 });
-                    ecb.SetComponent(entityInQueryIndex, cropEntity, translation);
+                    ecb.SetComponent(entityInQueryIndex, cropEntity, GetComponent<Translation>(cellEntity));
 
                     ecb.AddComponent(entityInQueryIndex, cellEntity, new Over { Value = cropEntity });
 
