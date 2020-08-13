@@ -24,7 +24,7 @@ public class AiCommandTillSystem : SystemBase
 
 			var getChildBuffer = GetBufferFromEntity<Child>(true);
 
-			Entities.WithAll<AiTagCommandTill>().WithNativeDisableContainerSafetyRestriction(worldGrid).ForEach((
+			Entities.WithAll<AiTagCommandTill>().WithNativeDisableContainerSafetyRestriction(worldGrid).WithReadOnly(worldGrid).ForEach((
 				int entityInQueryIndex,
 				ref Entity farmerEntity,
 				in AiTargetCell targetCell,
