@@ -18,7 +18,7 @@ public class TeleportCropsSystem : SystemBase
         var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
 
         float delta = Time.DeltaTime;
-        float speed = 3f;
+        float speed = 10f;
         Entities.WithAll<CropSellingTag>().ForEach((
             int entityInQueryIndex,
             Entity cropEntity,
@@ -32,7 +32,7 @@ public class TeleportCropsSystem : SystemBase
                 scaleComponent.Value.x -= delta;
                 scaleComponent.Value.z -= delta;
             }
-            if (translationComponent.Value.y > 1000)
+            if (translationComponent.Value.y > 100)
             {
                 ecb.DestroyEntity(entityInQueryIndex, cropEntity);
             }

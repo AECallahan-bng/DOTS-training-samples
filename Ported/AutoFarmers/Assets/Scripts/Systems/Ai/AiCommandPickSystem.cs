@@ -24,13 +24,10 @@ public class AiCommandPickSystem : SystemBase
             int2 sizeInt = new int2(size.Width, size.Height);
 
             FarmContent farmContent = GetSingleton<FarmContent>();
-			var getChildBuffer = GetBufferFromEntity<Child>(true);
 
 			Entities.WithAll<AiTagCommandPick>()
 				.WithNativeDisableParallelForRestriction(buffer)
-				.WithNativeDisableParallelForRestriction(getChildBuffer)
 				.WithReadOnly(buffer)
-				.WithReadOnly(getChildBuffer)
 				.ForEach((
                 int entityInQueryIndex,
                 ref Entity aiEntity,
@@ -43,25 +40,20 @@ public class AiCommandPickSystem : SystemBase
 
                 if (pos.Equals(targetCell.CellCoords))
                 {
-                    var childBuffer = getChildBuffer[cellEntity];
+                    var overComponent = GetComponent<Over>(cellEntity);
 
-					// iterate through all children of the cell, removing a fully-grown crop if we found one,
-					// and leaving all other children in the array (by adding them to the new DynamicBuffer that we
-					// are going to set as the child array)
-					for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
+					if (HasComponent<FullGrownCropTag>(overComponent.Value))
                     {
-                        if (HasComponent<FullGrownCropTag>(childBuffer[childIndex].Value))
-                        {
-                            Entity crop = childBuffer[childIndex].Value;
-                            ecb.RemoveComponent<Parent>(entityInQueryIndex, crop);
-							ecb.RemoveComponent<LocalToParent>(entityInQueryIndex, crop);
+                            Entity crop = overComponent.Value;
 							ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
                             ecb.AddComponent(entityInQueryIndex, crop, new AiObjectBeingCarried { CarrierEntity = aiEntity });
-                        }
                     }
+
+                    ecb.RemoveComponent<Over>(entityInQueryIndex, cellEntity);
 
                     ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, cellEntity);
                     ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, cellEntity);
+                    ecb.RemoveComponent<AssignedAi>(entityInQueryIndex, cellEntity);
 
                     ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
                     ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);
