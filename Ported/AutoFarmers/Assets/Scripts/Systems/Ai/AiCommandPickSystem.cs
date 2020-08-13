@@ -49,7 +49,7 @@ public class AiCommandPickSystem : SystemBase
                             ecb.AddComponent(entityInQueryIndex, crop, new AiObjectBeingCarried { CarrierEntity = aiEntity });
                     }
 
-                    ecb.RemoveComponent<Over>(entityInQueryIndex, cellEntity);
+                    ecb.SetComponent(entityInQueryIndex, cellEntity, new Over { Value = Entity.Null });
 
                     ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, cellEntity);
                     ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, cellEntity);
