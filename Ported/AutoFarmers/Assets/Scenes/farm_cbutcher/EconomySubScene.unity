@@ -192,8 +192,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3055410948f6cf54ba759c6703b44a86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Width: 60
-  Height: 60
+  Width: 400
+  Height: 400
 --- !u!114 &311270161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,8 +298,8 @@ MonoBehaviour:
     y: 1
   Seed: 3925
   TeleporterCount: 20
-  bGenerateTilled: 0
-  Rockthreshold: 0.5
+  GenerateTilled: 0
+  Rockthreshold: 0.4
 --- !u!1 &918034880
 GameObject:
   m_ObjectHideFlags: 0

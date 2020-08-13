@@ -23,6 +23,7 @@ public class AiCommandTillSystem : SystemBase
 			var getWorldGrid = GetBufferFromEntity<SectionWorldGrid>();
 
 			Entities.WithAll<AiTagCommandTill>()
+				.WithName("Ai_Command_Till")
 				.WithNativeDisableContainerSafetyRestriction(getWorldGrid)
 				.WithReadOnly(getWorldGrid)
 				.WithStructuralChanges()

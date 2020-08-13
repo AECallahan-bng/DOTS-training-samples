@@ -10,7 +10,7 @@ public class SpawnDronesSystem : SystemBase
 	protected override void OnUpdate()
 	{
 		var ecb = new EntityCommandBuffer(Allocator.TempJob);
-		Entities.ForEach((ref DroneResources resources, in DroneCost droneCost, in FarmContent farmContent) =>
+		Entities.WithName("Spawn_Drones").ForEach((ref DroneResources resources, in DroneCost droneCost, in FarmContent farmContent) =>
 		{
 			int newResources = resources.Resources;
 
