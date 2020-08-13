@@ -13,12 +13,13 @@ public class AiCommandPickSystem : SystemBase
         m_ECBSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
     }
     protected override void OnUpdate()
-    {
-        var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
+	{
+		UnityEngine.Debug.Log("Running Command Pick");
+		var ecb = m_ECBSystem.CreateCommandBuffer().AsParallelWriter();
 
-        var query = GetEntityQuery(typeof(SectionWorldGrid));
-        var buffer = GetBuffer<SectionWorldGrid>(query.GetSingletonEntity());
-        var size = GetSingleton<GridSize>();
+		var size = GetSingleton<GridSize>();
+		var worldGridEntity = GetSingletonEntity<SectionWorldTag>();
+        var buffer = GetBuffer<SectionWorldGrid>(worldGridEntity);
         int2 sizeInt = new int2(size.Width, size.Height);
 
         FarmContent farmContent = GetSingleton<FarmContent>();

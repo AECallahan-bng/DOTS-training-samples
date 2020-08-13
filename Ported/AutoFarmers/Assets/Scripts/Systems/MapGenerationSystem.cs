@@ -187,7 +187,7 @@ public class MapGenerationSystem : SystemBase
     
     protected override void OnUpdate()
     {
-
+		UnityEngine.Debug.Log("Generating the world");
         var ecb = new EntityCommandBuffer(Allocator.TempJob);
         GenerateEmpty(ecb);
         ecb.Playback(EntityManager);
@@ -203,7 +203,8 @@ public class MapGenerationSystem : SystemBase
         ecb.Playback(EntityManager);
         ecb.Dispose();
 
-        this.Enabled = false;
+		UnityEngine.Debug.Log("World generation complete");
+		this.Enabled = false;
     }
 }
 
