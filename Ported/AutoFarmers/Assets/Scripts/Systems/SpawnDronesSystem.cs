@@ -18,7 +18,7 @@ public class SpawnDronesSystem : SystemBase
 		var ecb = new EntityCommandBuffer(Allocator.TempJob);
 		var random = m_Random;
 
-		Entities.ForEach((ref DroneResources resources, in DroneCost droneCost, in FarmContent farmContent) =>
+		Entities.WithName("Spawn_Drones").ForEach((ref DroneResources resources, in DroneCost droneCost, in FarmContent farmContent) =>
 		{
 			int newResources = resources.Resources;
 

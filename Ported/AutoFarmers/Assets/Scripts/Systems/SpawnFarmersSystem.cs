@@ -18,7 +18,7 @@ public class SpawnFarmersSystem : SystemBase
 		var ecb = new EntityCommandBuffer(Allocator.TempJob);
 		var random = m_Random;
 
-		Entities.ForEach((ref FarmerResources resources, in FarmerCost farmerCost, in FarmContent farmContent) =>
+		Entities.WithName("Spawn_Farmers").ForEach((ref FarmerResources resources, in FarmerCost farmerCost, in FarmContent farmContent) =>
 		{
 			int newResources = resources.Resources;
 

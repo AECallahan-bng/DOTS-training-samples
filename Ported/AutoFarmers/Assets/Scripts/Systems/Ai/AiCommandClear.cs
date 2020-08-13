@@ -26,6 +26,7 @@ public class AiCommandClearSystem : SystemBase
 			float deltaTime = Time.DeltaTime;
 
 			Entities.WithAll<AiTagCommandClear>()
+				.WithName("Ai_Command_Clear")
 				.WithNativeDisableContainerSafetyRestriction(getWorldGrid)
 				.WithReadOnly(getWorldGrid)
 				.WithStructuralChanges()
@@ -56,6 +57,7 @@ public class AiCommandClearSystem : SystemBase
 
 			ecb = new EntityCommandBuffer(Allocator.Temp);
 			Entities
+				.WithName("Ai_Command_Clear_Apply")
 				.WithNativeDisableContainerSafetyRestriction(getWorldGrid)
 				.WithReadOnly(getWorldGrid)
 				.WithStructuralChanges()
