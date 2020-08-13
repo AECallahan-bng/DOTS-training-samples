@@ -40,14 +40,13 @@ public class AiCommandClearSystem : SystemBase
 
 				if (pos.Equals(targetCell.CellCoords))
 				{
-					Entity tilledLandEntity = ecb.Instantiate(farmContent.TilledLand);
-
 					ecb.RemoveComponent<AiTagCommandClear>(farmerEntity);
 					ecb.AddComponent<AiTagCommandIdle>(farmerEntity);
 
 					int mapIndex = targetCell.CellCoords.y * gridSize.Width + targetCell.CellCoords.x;
 					DynamicBuffer<SectionWorldGrid> worldGrid = getWorldGrid[mapEntity];
 					Entity cellEntity = worldGrid[mapIndex].Value;
+					ecb.RemoveComponent<AssignedAi>(cellEntity);
 					ecb.AppendToBuffer<RockDamageReport>(cellEntity, new RockDamageReport { Damage = deltaTime });
 				}
 			}).Run();

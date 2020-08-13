@@ -53,6 +53,7 @@ public class AiCommandTillSystem : SystemBase
 						ecb.DestroyEntity(existingGround.Value);
 					}
 					ecb.SetComponent<Ground>(cellEntity, new Ground() { Value = tilledLandEntity });
+					ecb.RemoveComponent<AssignedAi>(cellEntity);
 					ecb.SetComponent<Translation>(tilledLandEntity, GetComponent<Translation>(cellEntity));
 				}
 			}).Run();
