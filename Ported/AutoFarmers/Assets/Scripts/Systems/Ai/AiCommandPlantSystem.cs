@@ -33,21 +33,21 @@ public class AiCommandPlantSystem : SystemBase
             {
                 int2 pos = new int2((int)translation.Value.x, (int)translation.Value.z);
                 int bufferIndex = PosToIndex(sizeInt, targetCell.CellCoords);
-				Entity cellEntity = buffer[bufferIndex].Value;
+                Entity cellEntity = buffer[bufferIndex].Value;
 
-				if (pos.Equals(targetCell.CellCoords))
+                if (pos.Equals(targetCell.CellCoords))
                 {
                     Entity cropEntity = ecb.Instantiate(entityInQueryIndex, farmContent.Crop);
                     ecb.AddComponent(entityInQueryIndex, cropEntity, new CropGrowth { Value = 5 });
-                    ecb.AddComponent(entityInQueryIndex, cropEntity, new Parent { Value = buffer[bufferIndex].Value });
-                    ecb.AddComponent(entityInQueryIndex, cropEntity, new LocalToParent { Value = float4x4.identity });
-                    ecb.AddComponent(entityInQueryIndex, cropEntity, new LocalToWorld { Value = float4x4.identity });
-                    ecb.AppendToBuffer(entityInQueryIndex, cellEntity, new Child() { Value = cropEntity });
+                    ecb.SetComponent(entityInQueryIndex, cropEntity, translation);
 
-					ecb.RemoveComponent<CellTagTilledGround>(entityInQueryIndex, cellEntity);
-					ecb.AddComponent<CellTagPlantedGround>(entityInQueryIndex, cellEntity);
+                    ecb.AddComponent(entityInQueryIndex, cellEntity, new Over { Value = cropEntity });
 
-					ecb.RemoveComponent<AiTagCommandPlant>(entityInQueryIndex, farmerEntity);
+                    ecb.RemoveComponent<CellTagTilledGround>(entityInQueryIndex, cellEntity);
+                    ecb.AddComponent<CellTagPlantedGround>(entityInQueryIndex, cellEntity);
+                    ecb.RemoveComponent<AssignedAi>(entityInQueryIndex, cellEntity);
+
+                    ecb.RemoveComponent<AiTagCommandPlant>(entityInQueryIndex, farmerEntity);
                     ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, farmerEntity);
                 }
             }).ScheduleParallel();
