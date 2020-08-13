@@ -48,9 +48,11 @@ public class AiProcessCommandRequestPostSystem : SystemBase
 
 				for (int i = 0; i < requests.Length; i++)
 				{
+					bool IsExclusiveRequest = (requests[i].CommandType != AiCommands.Sell);
+
 					commandBuffer.DestroyEntity(entityInQueryIndex, requestEntities[i]);
 
-					if (processedRequests.Add(requests[i].TargetPosition))
+					if (!IsExclusiveRequest || processedRequests.Add(requests[i].TargetPosition))
 					{
 						commandBuffer.RemoveComponent<AiTagCommandIdle>(entityInQueryIndex, requests[i].RequestedAi);
 						commandBuffer.SetComponent(entityInQueryIndex, requests[i].RequestedAi, new AiTargetCell
