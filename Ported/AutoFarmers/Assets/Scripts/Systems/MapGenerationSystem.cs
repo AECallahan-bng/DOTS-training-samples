@@ -113,26 +113,30 @@ public class MapGenerationSystem : SystemBase
         {
             for (int x = 0; x != size.Width; ++x)
             {
-
                 var cell = ecb.CreateEntity();
-                ecb.AddComponent<CellTagUntilledGround>(cell);
-                ecb.AddComponent(cell, new CellPosition { Value = new int2(x,y) });
+				if (content.GenerateTilled)
+				{
+					ecb.AddComponent<CellTagTilledGround>(cell);
+				}
+				else
+				{
+					ecb.AddComponent<CellTagUntilledGround>(cell);
+				}
+				ecb.AddComponent(cell, new CellPosition { Value = new int2(x,y) });
                 ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
                 ecb.AddComponent(cell, new Translation() { Value = new float3(x * content.CellSize.x, 0, y * content.CellSize.y) });
                 ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
                 ecb.AddBuffer<Child>(cell);
                 
 
-                var cellLand = ecb.Instantiate(content.UntilledLand);
+                var cellLand = ecb.Instantiate(content.GenerateTilled ? content.TilledLand : content.UntilledLand);
                 ecb.AddComponent(cellLand, new Parent { Value = cell });
                 ecb.AddComponent(cellLand, new LocalToParent { Value = float4x4.identity });
                 ecb.AddComponent(cellLand, new LocalToWorld { Value = float4x4.identity });
-                ecb.AppendToBuffer(cell, new Child() { Value = cellLand });
-
+				ecb.AppendToBuffer(cell, new Child() { Value = cellLand });
 
                 ecb.AppendToBuffer(mapEntity, new SectionWorldGrid { Value = cell });
                 ecb.AppendToBuffer(mapEntity, new SectionWorldCollision { Blocked = false });
-
             }
         }
     }
@@ -165,10 +169,9 @@ public class MapGenerationSystem : SystemBase
                 {
                     var pos = new int2(x, y);
                     var posI = PosToIndex(size2, pos);
-                    if (noise[y * size.Width + x] > content.Rockthreshold && !collision[posI].Blocked)
+                    if (noise[y * size.Width + x] < content.Rockthreshold && !collision[posI].Blocked)
                     {
                         SetSectionCellRock(ecb, content, size, map, collision, pos);
-
                     }
                 }
             }

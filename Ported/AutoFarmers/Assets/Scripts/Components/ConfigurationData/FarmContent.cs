@@ -17,5 +17,6 @@ struct FarmContent : IComponentData
 	public Unity.Mathematics.float2 CellSize;
 	public uint Seed;
 	public int TeleporterCount;
+	public bool GenerateTilled;
 	public float Rockthreshold;
 }
