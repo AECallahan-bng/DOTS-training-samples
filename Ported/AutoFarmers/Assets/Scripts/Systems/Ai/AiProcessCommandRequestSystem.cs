@@ -13,52 +13,73 @@ public class AiProcessCommandRequestSystem : EntityCommandBufferSystem
 [UpdateAfter(typeof(AiProcessCommandRequestSystem))]
 public class AiProcessCommandRequestPostSystem : SystemBase
 {
+	private EntityQuery _requestQuery;
+	private EntityCommandBufferSystem _entityCommandBufferSystem;
+
 	protected override void OnCreate()
 	{
+		_requestQuery = GetEntityQuery(new EntityQueryDesc
+		{
+			All = new[]
+			{
+				ComponentType.ReadOnly<AiCommandRequest>()
+			}
+		});
+
 		_entityCommandBufferSystem = World.GetExistingSystem<EndSimulationEntityCommandBufferSystem>();
 	}
-
-	private EntityCommandBufferSystem _entityCommandBufferSystem;
 
 	protected override void OnUpdate()
 	{
 		var commandBuffer = _entityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+		NativeArray<Entity> requestEntities = _requestQuery.ToEntityArrayAsync(Allocator.TempJob, out var entitiesArrayHandle);
+		NativeArray<AiCommandRequest> requests = _requestQuery.ToComponentDataArrayAsync<AiCommandRequest>(Allocator.TempJob, out JobHandle requestsArrayJobHandle);
+
+		Dependency = JobHandle.CombineDependencies(Dependency, entitiesArrayHandle);
+		Dependency = JobHandle.CombineDependencies(Dependency, requestsArrayJobHandle);
+
 		// now process the requests
-		Entities.ForEach((int entityInQueryIndex, Entity aiEntity, ref AiCommandRequest request) => {
-			commandBuffer.DestroyEntity(entityInQueryIndex, aiEntity);
-
-			commandBuffer.RemoveComponent<AiTagCommandIdle>(entityInQueryIndex, request.RequestedAi);
-			commandBuffer.SetComponent(entityInQueryIndex, request.RequestedAi, new AiTargetCell
+		Entities
+			.WithDisposeOnCompletion(requestEntities)
+			.WithDisposeOnCompletion(requests)
+			.ForEach((int entityInQueryIndex, Entity worldEntity, in SectionWorldTag worldTag) =>
 			{
-				CellCoords = request.TargetPosition
-			});
+				for (int i = 0; i < requests.Length; i++)
+				{
+					commandBuffer.DestroyEntity(entityInQueryIndex, requestEntities[i]);
 
+					commandBuffer.RemoveComponent<AiTagCommandIdle>(entityInQueryIndex, requests[i].RequestedAi);
+					commandBuffer.SetComponent(entityInQueryIndex, requests[i].RequestedAi, new AiTargetCell
+					{
+						CellCoords = requests[i].TargetPosition
+					});
 
-			switch (request.CommandType)
-			{
-				case AiCommands.Clear:
-					commandBuffer.AddComponent<AiTagCommandClear>(entityInQueryIndex, request.RequestedAi);
-					break;
+					switch (requests[i].CommandType)
+					{
+						case AiCommands.Clear:
+							commandBuffer.AddComponent<AiTagCommandClear>(entityInQueryIndex, requests[i].RequestedAi);
+							break;
 
-				case AiCommands.Pick:
-					commandBuffer.AddComponent<AiTagCommandPick>(entityInQueryIndex, request.RequestedAi);
-					break;
+						case AiCommands.Pick:
+							commandBuffer.AddComponent<AiTagCommandPick>(entityInQueryIndex, requests[i].RequestedAi);
+							break;
 
-				case AiCommands.Plant:
-					commandBuffer.AddComponent<AiTagCommandPlant>(entityInQueryIndex, request.RequestedAi);
-					break;
+						case AiCommands.Plant:
+							commandBuffer.AddComponent<AiTagCommandPlant>(entityInQueryIndex, requests[i].RequestedAi);
+							break;
 
-				case AiCommands.Till:
-					commandBuffer.AddComponent<AiTagCommandTill>(entityInQueryIndex, request.RequestedAi);
-					break;
+						case AiCommands.Till:
+							commandBuffer.AddComponent<AiTagCommandTill>(entityInQueryIndex, requests[i].RequestedAi);
+							break;
 
-				case AiCommands.Sell:
-					commandBuffer.AddComponent<AiTagCommandSell>(entityInQueryIndex, request.RequestedAi);
-					break;
+						case AiCommands.Sell:
+							commandBuffer.AddComponent<AiTagCommandSell>(entityInQueryIndex, requests[i].RequestedAi);
+							break;
+					}
+				}
 			}
-		}).ScheduleParallel();
-
+		).ScheduleParallel();
+	
 		_entityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
-
 	}
 }
