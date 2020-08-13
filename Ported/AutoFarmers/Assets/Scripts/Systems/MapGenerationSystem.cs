@@ -33,7 +33,7 @@ public class MapGenerationSystem : SystemBase
     {
         get
         {
-            return new float3(0, 1.5f, 0);
+            return new float3(0, 1.0f, 0);
         }
     }
     protected override void OnCreate()
