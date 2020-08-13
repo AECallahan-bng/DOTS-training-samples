@@ -16,7 +16,7 @@ public class MapGenerationSystem : SystemBase
     }
     static internal int2 WorldToCell(float3 pos, float2 cellSize)
     {
-        return new int2((int)math.floor(pos.x / cellSize.x), (int)math.floor(pos.x / cellSize.x));
+        return new int2((int)math.floor(pos.x / cellSize.x), (int)math.floor(pos.z / cellSize.y));
     }
     protected override void OnCreate()
     {
@@ -33,35 +33,36 @@ public class MapGenerationSystem : SystemBase
         sectionGrid[posI] = new SectionWorldGrid { Value = Entity.Null };
     }
 
-    internal static void SetSectionCellRock(EntityCommandBuffer ecb,
-        FarmContent content,
-        GridSize size,
-        DynamicBuffer<SectionWorldGrid> sectionGrid, 
-        DynamicBuffer<SectionWorldCollision> sectionCollision, 
-        int2 pos)
-    {
+    //internal static void SetSectionCellRock(EntityCommandBuffer ecb,
+    //    FarmContent content,
+    //    GridSize size,
+    //    DynamicBuffer<SectionWorldGrid> sectionGrid, 
+    //    DynamicBuffer<SectionWorldCollision> sectionCollision, 
+    //    int2 pos)
+    //{
         
 
-        var posI = PosToIndex(new int2(size.Width, size.Height), pos);
-        ecb.DestroyEntity(sectionGrid[posI].Value);
+    //    var posI = PosToIndex(new int2(size.Width, size.Height), pos);
+    //    ecb.DestroyEntity(sectionGrid[posI].Value);
 
-        var cell = ecb.CreateEntity();
-        ecb.AddComponent(cell, new RockHealth { Value = 10 });
-        ecb.AddComponent(cell, new CellPosition { Value = pos });
-        ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
-        ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
-        ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
-        ecb.AddBuffer<Child>(cell);
+    //    var cell = ecb.CreateEntity();
+        
+    //    EntityManager.AddComponent(cell, new RockHealth { Value = 10 });
+    //    ecb.AddComponent(cell, new CellPosition { Value = pos });
+    //    ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
+    //    ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
+    //    ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
+    //    ecb.AddBuffer<Child>(cell);
 
-        var cellRock = ecb.Instantiate(content.Rock);
-        ecb.AddComponent(cellRock, new Parent { Value = cell });
-        ecb.AddComponent(cellRock, new LocalToParent { Value = float4x4.identity });
-        ecb.AddComponent(cellRock, new LocalToWorld { Value = float4x4.identity });
-        ecb.AppendToBuffer(cell, new Child() { Value = cellRock });
+    //    var cellRock = ecb.Instantiate(content.Rock);
+    //    ecb.AddComponent(cellRock, new Parent { Value = cell });
+    //    ecb.AddComponent(cellRock, new LocalToParent { Value = float4x4.identity });
+    //    ecb.AddComponent(cellRock, new LocalToWorld { Value = float4x4.identity });
+    //    ecb.AppendToBuffer(cell, new Child() { Value = cellRock });
 
-        sectionGrid[posI] = new SectionWorldGrid { Value = cell };
-        sectionCollision[posI] = new SectionWorldCollision { Blocked = true };
-    }
+    //    sectionGrid[posI] = new SectionWorldGrid { Value = cell };
+    //    sectionCollision[posI] = new SectionWorldCollision { Blocked = true };
+    //}
 
     //internal static void SetSectionCellUntilledGround(SystemBase em, EntityCommandBuffer.ParallelWriter ecb, int sortKey,
     //    FarmContent content,
@@ -171,7 +172,31 @@ public class MapGenerationSystem : SystemBase
                     var posI = PosToIndex(size2, pos);
                     if (noise[y * size.Width + x] < content.Rockthreshold && !collision[posI].Blocked)
                     {
-                        SetSectionCellRock(ecb, content, size, map, collision, pos);
+
+                        var cell = map[posI].Value;
+                        // retag cell
+                        ecb.RemoveComponent<CellTagTeleporter>(cell);
+                        ecb.RemoveComponent<CellTagTilledGround>(cell);
+                        ecb.RemoveComponent<CellTagPlantedGround>(cell);
+                        ecb.RemoveComponent<CellTagGrownCrop>(cell);
+                        ecb.AddComponent(cell, new RockHealth { Value = 10 });
+
+                        // destroy children
+                        var children = GetBuffer<Child>(cell);
+                        for(int i =0; i != children.Length; ++i)
+                        {
+                            ecb.RemoveComponent<Parent>(children[i].Value);
+                            //ecb.RemoveComponent<LocalToParent>(children[i].Value);
+                            //ecb.RemoveComponent<LocalToWorld>(children[i].Value);
+                            //ecb.DestroyEntity(children[i].Value);
+                        }
+                        //children.Clear();
+
+                        var cellRock = ecb.Instantiate(content.Rock);
+                        ecb.AddComponent(cellRock, new Parent { Value = cell });
+                        ecb.AddComponent(cellRock, new LocalToParent { Value = float4x4.identity });
+                        ecb.AddComponent(cellRock, new LocalToWorld { Value = float4x4.identity });
+                        
                     }
                 }
             }
@@ -196,31 +221,60 @@ public class MapGenerationSystem : SystemBase
                 var posI = PosToIndex(size2, pos);
                 if (!collision[posI].Blocked)
                 {
-                    ecb.DestroyEntity(map[posI].Value);
+                    var cell = map[posI].Value;
+                    // retag cell
+                    ecb.RemoveComponent<RockHealth>(cell);
+                    ecb.RemoveComponent<CellTagTilledGround>(cell);
+                    ecb.RemoveComponent<CellTagPlantedGround>(cell);
+                    ecb.RemoveComponent<CellTagGrownCrop>(cell);
+                    ecb.AddComponent< CellTagTeleporter>(cell);
 
-                    var cell = ecb.CreateEntity();
-                    ecb.AddComponent<CellTagTeleporter>(cell);
-                    ecb.AddComponent(cell, new CellPosition { Value = pos });
-                    ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
-                    ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
-                    ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
-                    ecb.AddBuffer<Child>(cell);
-
-                    var cellLand = ecb.Instantiate(content.UntilledLand);
-                    ecb.AddComponent(cellLand, new Parent { Value = cell });
-                    ecb.AddComponent(cellLand, new LocalToParent { Value = float4x4.identity });
-                    ecb.AddComponent(cellLand, new LocalToWorld { Value = float4x4.identity });
-                    ecb.AppendToBuffer(cell, new Child() { Value = cellLand });
+                    // destroy children
+                    var children = GetBuffer<Child>(cell);
+                    for (int iC = 0; iC != children.Length; ++iC)
+                    {
+                        //ecb.SetComponent(children[iC].Value, new Parent());
+                        //ecb.RemoveComponent<Parent>(children[iC].Value);
+                        //ecb.RemoveComponent<LocalToParent>(children[iC].Value);
+                        //ecb.DestroyEntity(children[iC].Value);
+                    }
+                    //children.Clear();
 
                     var cellTeleporter = ecb.Instantiate(content.Teleporter);
                     ecb.AddComponent(cellTeleporter, new Parent { Value = cell });
                     ecb.AddComponent(cellTeleporter, new LocalToParent { Value = float4x4.identity });
                     ecb.AddComponent(cellTeleporter, new LocalToWorld { Value = float4x4.identity });
-                    ecb.AppendToBuffer(cell, new Child() { Value = cellTeleporter });
 
+                    //var cellLand = ecb.Instantiate(content.UntilledLand);
+                    //ecb.AddComponent(cellLand, new Parent { Value = cell });
+                    //ecb.AddComponent(cellLand, new LocalToParent { Value = float4x4.identity });
+                    //ecb.AddComponent(cellLand, new LocalToWorld { Value = float4x4.identity });
 
-                    map[posI] = new SectionWorldGrid { Value = cell };
-                    collision[posI] = new SectionWorldCollision { Blocked = true };
+                    //ecb.DestroyEntity(map[posI].Value);
+                    //
+                    //var cell = ecb.CreateEntity();
+                    //ecb.AddComponent<CellTagTeleporter>(cell);
+                    //ecb.AddComponent(cell, new CellPosition { Value = pos });
+                    //ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
+                    //ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
+                    //ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
+                    //ecb.AddBuffer<Child>(cell);
+                    //
+                    //var cellLand = ecb.Instantiate(content.UntilledLand);
+                    //ecb.AddComponent(cellLand, new Parent { Value = cell });
+                    //ecb.AddComponent(cellLand, new LocalToParent { Value = float4x4.identity });
+                    //ecb.AddComponent(cellLand, new LocalToWorld { Value = float4x4.identity });
+                    //ecb.AppendToBuffer(cell, new Child() { Value = cellLand });
+                    //
+                    //var cellTeleporter = ecb.Instantiate(content.Teleporter);
+                    //ecb.AddComponent(cellTeleporter, new Parent { Value = cell });
+                    //ecb.AddComponent(cellTeleporter, new LocalToParent { Value = float4x4.identity });
+                    //ecb.AddComponent(cellTeleporter, new LocalToWorld { Value = float4x4.identity });
+                    //ecb.AppendToBuffer(cell, new Child() { Value = cellTeleporter });
+                    //
+                    //
+                    //map[posI] = new SectionWorldGrid { Value = cell };
+                    //collision[posI] = new SectionWorldCollision { Blocked = true };
                     ++i;
                 }
             }
@@ -240,10 +294,10 @@ public class MapGenerationSystem : SystemBase
         ecb.Playback(EntityManager);
         ecb.Dispose();
 
-        ecb = new EntityCommandBuffer(Allocator.TempJob);
-        GenerateRocks(ecb);
-        ecb.Playback(EntityManager);
-        ecb.Dispose();
+        //ecb = new EntityCommandBuffer(Allocator.TempJob);
+        //GenerateRocks(ecb);
+        //ecb.Playback(EntityManager);
+        //ecb.Dispose();
 
         this.Enabled = false;
     }
