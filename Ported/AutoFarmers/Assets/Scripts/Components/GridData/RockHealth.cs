@@ -6,5 +6,5 @@ using Unity.Mathematics;
 [GenerateAuthoringComponent]
 public struct RockHealth : IComponentData
 {
-	public int Value;
+	public float Value;
 }

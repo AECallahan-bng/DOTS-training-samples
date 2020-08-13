@@ -190,22 +190,23 @@ public class MapGenerationSystem : SystemBase
                         ecb.RemoveComponent<CellTagTilledGround>(cell);
                         ecb.RemoveComponent<CellTagPlantedGround>(cell);
                         ecb.RemoveComponent<CellTagGrownCrop>(cell);
-                        ecb.AddComponent(cell, new RockHealth { Value = 10 });
+                        ecb.AddComponent(cell, new RockHealth { Value = 2.0f });
+						ecb.AddBuffer<RockDamageReport>(cell);
 
-                        //// destroy children
-                        //var children = GetBuffer<Child>(cell);
-                        //for(int i =0; i != children.Length; ++i)
-                        //{
-                        //    ecb.SetComponent(children[i].Value, new Translation() { Value = new float3(-60, 0, 0) });
-                        //    //ecb.RemoveComponent<Parent>(children[i].Value);
-                        //    //ecb.RemoveComponent<LocalToParent>(children[i].Value);
-                        //    //ecb.RemoveComponent<LocalToWorld>(children[i].Value);
-                        //    //ecb.DestroyEntity(children[i].Value);
-                        //}
-                        //children.Clear();
+						//// destroy children
+						//var children = GetBuffer<Child>(cell);
+						//for(int i =0; i != children.Length; ++i)
+						//{
+						//    ecb.SetComponent(children[i].Value, new Translation() { Value = new float3(-60, 0, 0) });
+						//    //ecb.RemoveComponent<Parent>(children[i].Value);
+						//    //ecb.RemoveComponent<LocalToParent>(children[i].Value);
+						//    //ecb.RemoveComponent<LocalToWorld>(children[i].Value);
+						//    //ecb.DestroyEntity(children[i].Value);
+						//}
+						//children.Clear();
 
 
-                        var newOverE = ecb.Instantiate(content.Rock);
+						var newOverE = ecb.Instantiate(content.Rock);
                         ecb.AddComponent(newOverE, new Translation() { Value = CellToWorld(cellPos, content.CellSize) });
                         ecb.AddComponent(newOverE, new Rotation() { Value = quaternion.identity });
 
