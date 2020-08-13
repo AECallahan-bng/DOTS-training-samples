@@ -190,13 +190,14 @@ public class MapGenerationSystem : SystemBase
         ecb.Playback(EntityManager);
         ecb.Dispose();
 
+
         ecb = new EntityCommandBuffer(Allocator.TempJob);
-        GenerateTeleporters(ecb);
+        GenerateRocks(ecb);
         ecb.Playback(EntityManager);
         ecb.Dispose();
 
         ecb = new EntityCommandBuffer(Allocator.TempJob);
-        GenerateRocks(ecb);
+        GenerateTeleporters(ecb);
         ecb.Playback(EntityManager);
         ecb.Dispose();
 
