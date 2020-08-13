@@ -3,5 +3,7 @@
 
 public struct SectionWorldGrid : IBufferElementData
 {
-    public Entity Value;
+	public Entity Cell;
+	public Entity Ground;
+	public Entity Over;
 }
