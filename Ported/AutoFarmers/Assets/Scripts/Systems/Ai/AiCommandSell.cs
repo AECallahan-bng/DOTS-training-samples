@@ -27,7 +27,10 @@ public class AiCommandSell : SystemBase
 
 				if (pos.Equals(targetCell.CellCoords))
 				{
-					ecb.AddComponent<CropSellingTag>(entityInQueryIndex, carriedObjectComponent.CarriedObjectEntity);
+					Entity cropEntity = carriedObjectComponent.CarriedObjectEntity;
+
+					ecb.AddComponent<CropSellingTag>(entityInQueryIndex, cropEntity);
+					ecb.RemoveComponent<AiObjectBeingCarried>(entityInQueryIndex, cropEntity);
 					ecb.RemoveComponent<AiCarriedObject>(entityInQueryIndex, carrierEntity);
 
 					Entity transaction = ecb.CreateEntity(entityInQueryIndex);

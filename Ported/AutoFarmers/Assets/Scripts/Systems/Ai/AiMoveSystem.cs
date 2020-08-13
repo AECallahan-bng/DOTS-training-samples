@@ -25,5 +25,19 @@ public class AiMoveSystem : SystemBase
 			}
 
 		}).ScheduleParallel();
-    }
+
+		// NOTE: this writes to Translation for carried objects (crops) and reads from Translation for carrier objects (farmers/drones)
+		// which is why we need the WithNativeDisableContainerSafetyRestriction
+		var getTranslation = GetComponentDataFromEntity<Translation>(true);
+		Entities
+			.WithReadOnly(getTranslation)
+			.WithNativeDisableContainerSafetyRestriction(getTranslation)
+			.ForEach((ref Translation currentPosition, in AiObjectBeingCarried beingCarried) =>
+		{
+			Translation carrierPosition = getTranslation[beingCarried.CarrierEntity];
+
+			currentPosition.Value = carrierPosition.Value + math.up() * 0.8f;
+		}).ScheduleParallel();
+
+	}
 }
