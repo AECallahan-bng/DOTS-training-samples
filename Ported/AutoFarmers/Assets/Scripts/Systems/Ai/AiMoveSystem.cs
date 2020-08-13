@@ -28,14 +28,38 @@ public class AiMoveSystem : SystemBase
 
 			if (IsFarmer)
 			{
+				float deltaPosition = deltaTime * movementSpeed;
+
 				// farmers travel along manhattan coordinates
 				if (math.abs(direction.x) > math.abs(direction.z))
 				{
-					currentPosition.Value.x += deltaTime * movementSpeed * math.sign(direction.x);
+					if (direction.x > deltaPosition)
+					{
+						currentPosition.Value.x += deltaPosition;
+					}
+					else if (direction.x < -deltaPosition)
+					{
+						currentPosition.Value.x -= deltaPosition;
+					}
+					else
+					{
+						currentPosition.Value.x = destination.x;
+					}
 				}
 				else
 				{
-					currentPosition.Value.z += deltaTime * movementSpeed * math.sign(direction.z);
+					if (direction.z > deltaPosition)
+					{
+						currentPosition.Value.z += deltaPosition;
+					}
+					else if (direction.z < -deltaPosition)
+					{
+						currentPosition.Value.z -= deltaPosition;
+					}
+					else
+					{
+						currentPosition.Value.z = destination.z;
+					}
 				}
 			}
 			else
