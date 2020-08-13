@@ -40,7 +40,12 @@ public class AiCommandPickSystem : SystemBase
                 if (pos.Equals(targetCell.CellCoords))
                 {
                     var childBuffer = GetBuffer<Child>(entityInPos);
+                    for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
+                    {
+                        
+                    }
                     
+
                     ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, entityInPos);
                     ecb.RemoveComponent<CellTagPlantedGround>(entityInQueryIndex, entityInPos);
                     ecb.AddComponent<CellTagTilledGround>(entityInQueryIndex, entityInPos);
