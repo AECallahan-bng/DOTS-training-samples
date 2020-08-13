@@ -44,19 +44,15 @@ public class AiCommandPickSystem : SystemBase
                 if (pos.Equals(targetCell.CellCoords))
                 {
                     var childBuffer = getChildBuffer[entityInPos];
-                    Entity tile = new Entity();
-                    Entity crop;
+                    
                     for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
                     {
                         if (HasComponent<FullGrownCropTag>(childBuffer[childIndex].Value))
                         {
-                            crop = childBuffer[childIndex].Value;
+                            Entity crop = childBuffer[childIndex].Value;
                             ecb.RemoveComponent<Parent>(entityInQueryIndex, crop);
                             ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
-                        }
-                        else
-                        {
-                            tile = childBuffer[childIndex].Value;
+                            ecb.AddComponent<AiObjectBeingCarried>(entityInQueryIndex, crop);
                         }
                     }
 
