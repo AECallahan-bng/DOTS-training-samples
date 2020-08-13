@@ -63,34 +63,40 @@ public class MapGenerationSystem : SystemBase
         sectionCollision[posI] = new SectionWorldCollision { Blocked = true };
     }
 
-    internal static void SetSectionCellUntilledGround(EntityCommandBuffer ecb,
-        FarmContent content,
-        GridSize size,
-        DynamicBuffer<SectionWorldGrid> sectionGrid,
-        DynamicBuffer<SectionWorldCollision> sectionCollision,
-        int2 pos)
-    {
-        var posI = PosToIndex(new int2(size.Width, size.Height), pos);
-        ecb.DestroyEntity(sectionGrid[posI].Value);
-
-
-        var cell = ecb.CreateEntity();
-        ecb.AddComponent<CellTagUntilledGround>(cell);
-        ecb.AddComponent(cell, new CellPosition { Value = pos });
-        ecb.AddComponent(cell, new LocalToWorld() { Value = float4x4.identity });
-        ecb.AddComponent(cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
-        ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
-        ecb.AddBuffer<Child>(cell);
-
-        var cellLand = ecb.Instantiate(content.UntilledLand);
-        ecb.AddComponent(cellLand, new Parent { Value = cell });
-        ecb.AddComponent(cellLand, new LocalToParent { Value = float4x4.identity });
-        ecb.AddComponent(cellLand, new LocalToWorld { Value = float4x4.identity });
-        ecb.AppendToBuffer(cell, new Child() { Value = cellLand });
-
-        sectionGrid[posI] = new SectionWorldGrid { Value = cell };
-        sectionCollision[posI] = new SectionWorldCollision { Blocked = false };
-    }
+    //internal static void SetSectionCellUntilledGround(SystemBase em, EntityCommandBuffer.ParallelWriter ecb, int sortKey,
+    //    FarmContent content,
+    //    GridSize size,
+    //    DynamicBuffer<SectionWorldGrid> sectionGrid,
+    //    DynamicBuffer<SectionWorldCollision> sectionCollision,
+    //    int2 pos)
+    //{
+    //    var posI = PosToIndex(new int2(size.Width, size.Height), pos);
+    //    // ecb.DestroyEntity(sortKey, sectionGrid[posI].Value);
+    //    var cell = sectionGrid[posI].Value;
+        
+    //    if (em.HasComponent<RockHealth>(cell))
+    //    {
+    //        ecb.RemoveComponent<RockHealth>(sortKey, cell);
+    //    }
+        
+        
+    //    ////var cell = ecb.CreateEntity(sortKey);
+    //    //ecb.AddComponent<CellTagUntilledGround>(sortKey, cell);
+    //    //ecb.AddComponent(sortKey, cell, new CellPosition { Value = pos });
+    //    //ecb.AddComponent(sortKey, cell, new LocalToWorld() { Value = float4x4.identity });
+    //    //ecb.AddComponent(sortKey, cell, new Translation() { Value = new float3(pos.x * content.CellSize.x, 0, pos.y * content.CellSize.y) });
+    //    //ecb.AddComponent(sortKey, cell, new Rotation() { Value = quaternion.identity });
+    //    //ecb.AddBuffer<Child>(sortKey, cell);
+    //    //
+    //    //var cellLand = ecb.Instantiate(sortKey, content.UntilledLand);
+    //    //ecb.AddComponent(sortKey, cellLand, new Parent { Value = cell });
+    //    //ecb.AddComponent(sortKey, cellLand, new LocalToParent { Value = float4x4.identity });
+    //    //ecb.AddComponent(sortKey, cellLand, new LocalToWorld { Value = float4x4.identity });
+    //    //ecb.AppendToBuffer(sortKey, cell, new Child() { Value = cellLand });
+    //    ////ecb.
+    //    //sectionGrid[posI] = new SectionWorldGrid { Value = cell };
+    //    //sectionCollision[posI] = new SectionWorldCollision { Blocked = false };
+    //}
 
     protected void GenerateEmpty(EntityCommandBuffer ecb)
     {
@@ -115,6 +121,7 @@ public class MapGenerationSystem : SystemBase
                 ecb.AddComponent(cell, new Translation() { Value = new float3(x * content.CellSize.x, 0, y * content.CellSize.y) });
                 ecb.AddComponent(cell, new Rotation() { Value = quaternion.identity });
                 ecb.AddBuffer<Child>(cell);
+                
 
                 var cellLand = ecb.Instantiate(content.UntilledLand);
                 ecb.AddComponent(cellLand, new Parent { Value = cell });
@@ -238,4 +245,3 @@ public class MapGenerationSystem : SystemBase
         this.Enabled = false;
     }
 }
-

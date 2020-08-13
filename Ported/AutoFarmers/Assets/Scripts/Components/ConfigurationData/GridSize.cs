@@ -7,4 +7,11 @@ struct GridSize : IComponentData
 {
 	public int Width;
 	public int Height;
+	public Unity.Mathematics.int2 Value
+	{
+		get
+		{
+			return new Unity.Mathematics.int2(Width, Height);
+		}
+	}
 }

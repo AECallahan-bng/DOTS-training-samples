@@ -13,6 +13,7 @@ struct FarmContent : IComponentData
 	public Entity Farmer;
 	public Entity Drone;
 	public Entity Crop;
+	// size in real world of a cell. Should be (1,1)
 	public Unity.Mathematics.float2 CellSize;
 	public uint Seed;
 	public int TeleporterCount;
