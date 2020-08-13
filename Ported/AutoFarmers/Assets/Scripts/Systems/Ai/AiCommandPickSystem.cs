@@ -33,38 +33,23 @@ public class AiCommandPickSystem : SystemBase
 				ref Entity aiEntity,
 				in AiTargetCell targetCell,
 				in Translation translation) =>
-				var query = GetEntityQuery(typeof(SectionWorldGrid));
-				var buffer = GetBuffer<SectionWorldGrid>(query.GetSingletonEntity());
-				var size = GetSingleton<GridSize>();
-				int2 sizeInt = new int2(size.Width, size.Height);
+			{
+				int2 pos = new int2((int)translation.Value.x, (int)translation.Value.z);
+				int bufferIndex = PosToIndex(sizeInt, targetCell.CellCoords);
+				Entity entityInPos = buffer[bufferIndex].Value;
 
-				FarmContent farmContent = GetSingleton<FarmContent>();
-
-				Entities.WithAll<AiTagCommandPick>()
-					.WithNativeDisableParallelForRestriction(buffer)
-					.ForEach((
-					int entityInQueryIndex,
-					ref Entity aiEntity,
-					in AiTargetCell targetCell,
-					in Translation translation) =>
+				if (pos.Equals(targetCell.CellCoords))
 				{
-					int2 pos = new int2((int)translation.Value.x, (int)translation.Value.z);
-					int bufferIndex = PosToIndex(sizeInt, targetCell.CellCoords);
-					Entity entityInPos = buffer[bufferIndex].Value;
+					ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, entityInPos);
 
-					if (pos.Equals(targetCell.CellCoords))
-					{
-						ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, entityInPos);
+					ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
+					ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);
+					ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = entityInPos });
 
-						ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
-						ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);
-						ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = entityInPos });
-
-						//buffer[bufferIndex] = new SectionWorldGrid { Value = ecb.Instantiate(entityInQueryIndex, farmContent.TilledLand) };
-						//ecb.SetComponent(entityInQueryIndex, buffer[bufferIndex].Value, translation);
-					}
-				}).ScheduleParallel();
-			}
+					//buffer[bufferIndex] = new SectionWorldGrid { Value = ecb.Instantiate(entityInQueryIndex, farmContent.TilledLand) };
+					//ecb.SetComponent(entityInQueryIndex, buffer[bufferIndex].Value, translation);
+				}
+			}).ScheduleParallel();
 			m_ECBSystem.AddJobHandleForProducer(Dependency);
 		}
     }
