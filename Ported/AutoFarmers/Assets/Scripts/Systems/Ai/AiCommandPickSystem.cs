@@ -44,16 +44,25 @@ public class AiCommandPickSystem : SystemBase
                 if (pos.Equals(targetCell.CellCoords))
                 {
                     var childBuffer = getChildBuffer[cellEntity];
-                    
-                    for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
+					var newChildBuffer = ecb.SetBuffer<Child>(entityInQueryIndex, cellEntity);
+
+					// iterate through all children of the cell, removing a fully-grown crop if we found one,
+					// and leaving all other children in the array (by adding them to the new DynamicBuffer that we
+					// are going to set as the child array)
+					for (int childIndex = 0; childIndex < childBuffer.Length; ++childIndex)
                     {
                         if (HasComponent<FullGrownCropTag>(childBuffer[childIndex].Value))
                         {
                             Entity crop = childBuffer[childIndex].Value;
                             ecb.RemoveComponent<Parent>(entityInQueryIndex, crop);
-                            ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
+							ecb.RemoveComponent<LocalToParent>(entityInQueryIndex, crop);
+							ecb.AddComponent(entityInQueryIndex, aiEntity, new AiCarriedObject { CarriedObjectEntity = crop });
                             ecb.AddComponent(entityInQueryIndex, crop, new AiObjectBeingCarried { CarrierEntity = aiEntity });
                         }
+						else
+						{
+							newChildBuffer.Add(new Child() { Value = childBuffer[childIndex].Value });
+						}
                     }
 
                     ecb.RemoveComponent<CellTagGrownCrop>(entityInQueryIndex, cellEntity);
@@ -61,8 +70,6 @@ public class AiCommandPickSystem : SystemBase
 
                     ecb.RemoveComponent<AiTagCommandPick>(entityInQueryIndex, aiEntity);
                     ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, aiEntity);
-
-                    //ecb.SetBuffer<Child>(entityInQueryIndex, tile);
                 }
             }).ScheduleParallel();
         }
