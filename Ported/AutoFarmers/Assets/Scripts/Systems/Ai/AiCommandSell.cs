@@ -25,7 +25,7 @@ public class AiCommandSell : SystemBase
 			{
 				int2 pos = new int2((int)translationComponent.Value.x, (int)translationComponent.Value.z);
 
-				if (pos.Equals(targetCell.CellCoords))
+				if (pos.Equals(targetCell.CellCoords) && translationComponent.Value.y < 0.5f)
 				{
 					Entity cropEntity = carriedObjectComponent.CarriedObjectEntity;
 

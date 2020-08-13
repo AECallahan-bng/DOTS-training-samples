@@ -38,7 +38,7 @@ public class AiCommandPickSystem : SystemBase
                 int bufferIndex = PosToIndex(sizeInt, targetCell.CellCoords);
                 Entity cellEntity = buffer[bufferIndex].Value;
 
-                if (pos.Equals(targetCell.CellCoords))
+                if (pos.Equals(targetCell.CellCoords) && translation.Value.y < 0.5f)
                 {
                     var overComponent = GetComponent<Over>(cellEntity);
 

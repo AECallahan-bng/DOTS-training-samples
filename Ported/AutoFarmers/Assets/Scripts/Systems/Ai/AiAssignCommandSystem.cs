@@ -126,7 +126,7 @@ public class AiAssignCommandSystem : SystemBase
 				}
 			}
 
-			if (selectedCommand == AiCommands.Idle && IsFarmer && !IsCarrying)
+			if (selectedCommand == AiCommands.Idle && !IsCarrying)
 			{
 				AiAssignCommandSystem.FindClosestCell(ref crops, ref aiCellPosition, out int closestCropIndex, out float closestCropDistanceSq);
 				if (closestCropDistanceSq < cAutoCropDistance * cAutoCropDistance)

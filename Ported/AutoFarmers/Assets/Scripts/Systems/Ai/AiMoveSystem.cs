@@ -7,21 +7,59 @@ using Unity.Transforms;
 
 public class AiMoveSystem : SystemBase
 {
-	const float cMovementSpeed = 2.0f;
+	const float cFarmerMovementSpeed = 4.0f;
+	const float cDroneMovementSpeed = 6.0f;
+	const float cDroneVerticalSpeed = 2.0f;
 
-    protected override void OnUpdate()
+	protected override void OnUpdate()
     {
 		float deltaTime = Time.DeltaTime;
-        Entities.ForEach((ref Translation currentPosition, in AiTargetCell moveTarget) => {
-			float2 direction = new float2(moveTarget.CellCoords.x + 0.5f, moveTarget.CellCoords.y + 0.5f) - new float2(currentPosition.Value.x, currentPosition.Value.z);
 
-			if (math.abs(direction.x) > math.abs(direction.y))
+        Entities.ForEach((
+			int entityInQueryIndex,
+			Entity aiEntity,
+			ref Translation currentPosition, 
+			in AiTargetCell moveTarget) =>
+		{
+			bool IsFarmer = HasComponent<AiTagFarmer>(aiEntity);        // PERF: Could test this on a per-chunk basis if we use IJobChunk
+			float movementSpeed = IsFarmer ? cFarmerMovementSpeed : cDroneMovementSpeed;
+			float3 destination = new float3(moveTarget.CellCoords.x + 0.5f, 0.0f, moveTarget.CellCoords.y + 0.5f);
+			float3 direction = destination - currentPosition.Value;
+
+			if (IsFarmer)
 			{
-				currentPosition.Value.x += deltaTime * cMovementSpeed * math.sign(direction.x);
+				// farmers travel along manhattan coordinates
+				if (math.abs(direction.x) > math.abs(direction.z))
+				{
+					currentPosition.Value.x += deltaTime * movementSpeed * math.sign(direction.x);
+				}
+				else
+				{
+					currentPosition.Value.z += deltaTime * movementSpeed * math.sign(direction.z);
+				}
 			}
 			else
 			{
-				currentPosition.Value.z += deltaTime * cMovementSpeed * math.sign(direction.y);
+				float direction2d_sq = direction.x * direction.x + direction.z * direction.z;
+
+				if (direction2d_sq > 0.0f)
+				{
+					float direction2d_sqrt = math.sqrt(direction2d_sq);
+
+					direction.x /= direction2d_sqrt;
+					direction.z /= direction2d_sqrt;
+				}
+
+				// drones travel at Y = 6 until near their destination
+				if (direction2d_sq > 3.0f * 3.0f)
+				{
+					destination.y = 6.0f;
+					direction.y = destination.y - currentPosition.Value.y;
+				}
+
+				currentPosition.Value.x += deltaTime * cDroneMovementSpeed * direction.x;
+				currentPosition.Value.y += deltaTime * cDroneVerticalSpeed * math.sign(direction.y);
+				currentPosition.Value.z += deltaTime * cDroneMovementSpeed * direction.z;
 			}
 
 		}).ScheduleParallel();
