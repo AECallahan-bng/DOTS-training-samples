@@ -27,6 +27,7 @@ public class AiCommandPlantSystem : SystemBase
             {
                 Entity cropEntity = ecb.Instantiate(entityInQueryIndex, farmContent.Crop);
                 ecb.AddComponent(entityInQueryIndex, cropEntity, new CropGrowth { Value = 5 });
+                ecb.SetComponent(entityInQueryIndex, cropEntity, translation);
 
                 ecb.RemoveComponent<AiTagCommandPlant>(entityInQueryIndex, farmerEntity);
                 ecb.AddComponent<AiTagCommandIdle>(entityInQueryIndex, farmerEntity);
