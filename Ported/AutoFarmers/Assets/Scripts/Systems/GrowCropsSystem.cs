@@ -40,7 +40,7 @@ public class GrowCropsSystem : SystemBase
             currentScale.x = math.lerp(1, currentScale.x, math.clamp(growthComponent.Value, 0, 1));
             currentScale.y = math.lerp(1, currentScale.y, math.clamp(growthComponent.Value, 0, 1));
             currentScale.z = math.lerp(1, currentScale.z, math.clamp(growthComponent.Value, 0, 1));
-            growthComponent.Value -= delta/10;
+            growthComponent.Value -= delta;
 
             if (growthComponent.Value <= 0)
             {

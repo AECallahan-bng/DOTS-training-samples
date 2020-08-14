@@ -14,11 +14,15 @@ public class AiMoveSystem : SystemBase
 	protected override void OnUpdate()
     {
 		float deltaTime = Time.DeltaTime;
+		float farmerSmooth = 1f - math.pow(0.003f, deltaTime);
+		float droneSmooth = 1f - math.pow(0.1f, deltaTime);
 
-        Entities.ForEach((
+		Entities.WithNone<AiTagCommandIdle>().ForEach((
 			int entityInQueryIndex,
 			Entity aiEntity,
-			ref Translation currentPosition, 
+			ref MovePosition currentPosition,
+			ref Translation smoothPosition, 
+			ref Rotation currentRotation,
 			in AiTargetCell moveTarget) =>
 		{
 			bool IsFarmer = HasComponent<AiTagFarmer>(aiEntity);        // PERF: Could test this on a per-chunk basis if we use IJobChunk
@@ -30,8 +34,8 @@ public class AiMoveSystem : SystemBase
 			{
 				float deltaPosition = deltaTime * movementSpeed;
 
-				// farmers travel along manhattan coordinates
-				if (math.abs(direction.x) > math.abs(direction.z))
+				// farmers travel along manhattan coordinates and diagonals
+				// if (math.abs(direction.x) > math.abs(direction.z))
 				{
 					if (direction.x > deltaPosition)
 					{
@@ -46,7 +50,9 @@ public class AiMoveSystem : SystemBase
 						currentPosition.Value.x = destination.x;
 					}
 				}
-				else
+
+				// else
+
 				{
 					if (direction.z > deltaPosition)
 					{
@@ -65,25 +71,40 @@ public class AiMoveSystem : SystemBase
 			else
 			{
 				float direction2d_sq = direction.x * direction.x + direction.z * direction.z;
+				float maxMove = deltaTime * cDroneMovementSpeed;
 
-				if (direction2d_sq > 0.0f)
+				if (direction2d_sq < maxMove * maxMove)
+				{
+					currentPosition.Value.x += direction.x;
+					currentPosition.Value.z += direction.z;
+				}
+				else
 				{
 					float direction2d_sqrt = math.sqrt(direction2d_sq);
 
-					direction.x /= direction2d_sqrt;
-					direction.z /= direction2d_sqrt;
+					currentPosition.Value.x += maxMove * direction.x / direction2d_sqrt;
+					currentPosition.Value.z += maxMove * direction.z / direction2d_sqrt;
+
+					// drones travel at Y = 6 until near their destination
+					if (direction2d_sqrt > 3.0f)
+					{
+						destination.y = 6.0f;
+						direction.y = destination.y - currentPosition.Value.y;
+					}
 				}
 
-				// drones travel at Y = 6 until near their destination
-				if (direction2d_sq > 3.0f * 3.0f)
-				{
-					destination.y = 6.0f;
-					direction.y = destination.y - currentPosition.Value.y;
-				}
-
-				currentPosition.Value.x += deltaTime * cDroneMovementSpeed * direction.x;
 				currentPosition.Value.y += deltaTime * cDroneVerticalSpeed * math.sign(direction.y);
-				currentPosition.Value.z += deltaTime * cDroneMovementSpeed * direction.z;
+			}
+
+			// smoothPosition.Value = currentPosition.Value;
+			smoothPosition.Value = math.lerp(smoothPosition.Value, currentPosition.Value, IsFarmer ? farmerSmooth : droneSmooth);
+
+			if (!IsFarmer)
+			{
+				float3 tilt = new float3(currentPosition.Value.x - smoothPosition.Value.x, 2.0f, currentPosition.Value.z - smoothPosition.Value.z);
+				float3 forward = math.normalize(math.cross(tilt, math.up()));
+
+				currentRotation.Value = quaternion.LookRotationSafe(forward, tilt);
 			}
 
 		}).ScheduleParallel();
