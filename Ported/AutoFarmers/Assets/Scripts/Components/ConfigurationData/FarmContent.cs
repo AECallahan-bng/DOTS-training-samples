@@ -19,4 +19,9 @@ struct FarmContent : IComponentData
 	public int TeleporterCount;
 	public bool GenerateTilled;
 	public float Rockthreshold;
+	public int AiRandomJitterTill;
+	public int AiRandomJitterPlant;
+	public int AiRandomJitterClear;
+	public int AiRandomJitterPick;
+	public int AiRandomJitterSell;
 }

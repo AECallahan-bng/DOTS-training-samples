@@ -4,6 +4,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
+using Random = Unity.Mathematics.Random;
 
 public class AiAssignCommandSystem : SystemBase
 {
@@ -14,8 +15,12 @@ public class AiAssignCommandSystem : SystemBase
 	private EntityQuery _queryUntilledLand;
 	private AiProcessCommandRequestSystem _commandBufferSystem;
 
+	private Random m_Random;
+
 	protected override void OnCreate()
 	{
+		m_Random = new Random(0x1234567);
+
 		_queryRocks = GetEntityQuery(new EntityQueryDesc
 		{
 			All = new ComponentType[] {
@@ -76,7 +81,7 @@ public class AiAssignCommandSystem : SystemBase
 
     protected override void OnUpdate()
 	{
-		const float cAutoCropDistance = 10.0f;
+		const float cAutoCropDistance = 20.0f;
 		const float cAutoRockDistance = 4.0f;
 		const float cAutoPlantDistance = 10.0f;
 
@@ -94,19 +99,25 @@ public class AiAssignCommandSystem : SystemBase
 
 		var commandBuffer = _commandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
+		var content = GetSingleton<FarmContent>();
+		
+		var random = m_Random;
+
 		Entities
 			.WithDisposeOnCompletion(rocks)
 			.WithDisposeOnCompletion(crops)
 			.WithDisposeOnCompletion(teleporters)
 			.WithDisposeOnCompletion(tilledLand)
 			.WithDisposeOnCompletion(untilledLand)
-			.WithAll<AiTagCommandIdle>().
-			ForEach((
+			.WithAll<AiTagCommandIdle>()
+			.ForEach((
 				int entityInQueryIndex, 
 				Entity aiEntity, 
-				ref Translation aiPosition) => {
-
+				ref Translation aiPosition) => 
+		{
 			int2 aiCellPosition = new int2((int)aiPosition.Value.x, (int)aiPosition.Value.z);
+			random.InitState((uint)(0x1234567 ^ entityInQueryIndex ^ aiEntity.Index));
+
 			AiCommands closestType = AiCommands.Idle;
 			AiCommands selectedCommand = AiCommands.Idle;
 			int2 closestPosition = default;
@@ -116,7 +127,11 @@ public class AiAssignCommandSystem : SystemBase
 
 			if (selectedCommand == AiCommands.Idle && IsCarrying)
 			{
-				AiAssignCommandSystem.FindClosestCell(ref teleporters, ref aiCellPosition, out int closestTeleporterIndex, out float closestTeleporterDistanceSq);
+				int2 jitteredCellPosition = aiCellPosition;
+				jitteredCellPosition.x += random.NextInt(-content.AiRandomJitterSell, content.AiRandomJitterSell);
+				jitteredCellPosition.y += random.NextInt(-content.AiRandomJitterSell, content.AiRandomJitterSell);
+
+				AiAssignCommandSystem.FindClosestCell(ref teleporters, ref jitteredCellPosition, out int closestTeleporterIndex, out float closestTeleporterDistanceSq);
 
 				if (closestTeleporterIndex != -1)
 				{
@@ -128,7 +143,11 @@ public class AiAssignCommandSystem : SystemBase
 
 			if (selectedCommand == AiCommands.Idle && !IsCarrying)
 			{
-				AiAssignCommandSystem.FindClosestCell(ref crops, ref aiCellPosition, out int closestCropIndex, out float closestCropDistanceSq);
+				int2 jitteredCellPosition = aiCellPosition;
+				jitteredCellPosition.x += random.NextInt(-content.AiRandomJitterPick, content.AiRandomJitterPick);
+				jitteredCellPosition.y += random.NextInt(-content.AiRandomJitterPick, content.AiRandomJitterPick);
+
+				AiAssignCommandSystem.FindClosestCell(ref crops, ref jitteredCellPosition, out int closestCropIndex, out float closestCropDistanceSq);
 				if (closestCropDistanceSq < cAutoCropDistance * cAutoCropDistance)
 				{
 					selectedCommand = AiCommands.Pick;
@@ -145,7 +164,11 @@ public class AiAssignCommandSystem : SystemBase
 
 			if (selectedCommand == AiCommands.Idle && IsFarmer && !IsCarrying)
 			{
-				AiAssignCommandSystem.FindClosestCell(ref rocks, ref aiCellPosition, out int closestRockIndex, out float closestRockDistanceSq);
+				int2 jitteredCellPosition = aiCellPosition;
+				jitteredCellPosition.x += random.NextInt(-content.AiRandomJitterClear, content.AiRandomJitterClear);
+				jitteredCellPosition.y += random.NextInt(-content.AiRandomJitterClear, content.AiRandomJitterClear);
+
+				AiAssignCommandSystem.FindClosestCell(ref rocks, ref jitteredCellPosition, out int closestRockIndex, out float closestRockDistanceSq);
 				if (closestRockDistanceSq < cAutoRockDistance * cAutoRockDistance)
 				{
 					selectedCommand = AiCommands.Clear;
@@ -161,7 +184,11 @@ public class AiAssignCommandSystem : SystemBase
 
 			if (selectedCommand == AiCommands.Idle && IsFarmer && !IsCarrying)
 			{
-				AiAssignCommandSystem.FindClosestCell(ref tilledLand, ref aiCellPosition, out int closestTilledLandIndex, out float closestTilledLandDistanceSq);
+				int2 jitteredCellPosition = aiCellPosition;
+				jitteredCellPosition.x += random.NextInt(-content.AiRandomJitterPlant, content.AiRandomJitterPlant);
+				jitteredCellPosition.y += random.NextInt(-content.AiRandomJitterPlant, content.AiRandomJitterPlant);
+
+				AiAssignCommandSystem.FindClosestCell(ref tilledLand, ref jitteredCellPosition, out int closestTilledLandIndex, out float closestTilledLandDistanceSq);
 				if (closestTilledLandDistanceSq < cAutoPlantDistance * cAutoPlantDistance)
 				{
 					selectedCommand = AiCommands.Plant;
@@ -177,7 +204,11 @@ public class AiAssignCommandSystem : SystemBase
 
 			if (selectedCommand == AiCommands.Idle && IsFarmer && !IsCarrying)
 			{
-				AiAssignCommandSystem.FindClosestCell(ref untilledLand, ref aiCellPosition, out int closestUntilledLandIndex, out float closestUntilledLandDistanceSq);
+				int2 jitteredCellPosition = aiCellPosition;
+				jitteredCellPosition.x += random.NextInt(-content.AiRandomJitterTill, content.AiRandomJitterTill);
+				jitteredCellPosition.y += random.NextInt(-content.AiRandomJitterTill, content.AiRandomJitterTill);
+
+				AiAssignCommandSystem.FindClosestCell(ref untilledLand, ref jitteredCellPosition, out int closestUntilledLandIndex, out float closestUntilledLandDistanceSq);
 				if (closestUntilledLandDistanceSq < closestDistanceSq)
 				{
 					closestDistanceSq = closestUntilledLandDistanceSq;
