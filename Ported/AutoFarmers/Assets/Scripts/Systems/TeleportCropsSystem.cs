@@ -19,24 +19,26 @@ public class TeleportCropsSystem : SystemBase
 
         float delta = Time.DeltaTime;
         float speed = 10f;
-        Entities.WithAll<CropSellingTag>().ForEach((
+        Entities.ForEach((
             int entityInQueryIndex,
             Entity cropEntity,
+            ref CropSellingTag timedLapsed,
             ref Translation translationComponent, 
             ref NonUniformScale scaleComponent) => 
         {
-            translationComponent.Value.y += delta * speed;
+            translationComponent.Value.y += timedLapsed.Value * speed;
             
             if (scaleComponent.Value.x >= 0.1f)
             {
                 scaleComponent.Value.x -= delta;
                 scaleComponent.Value.z -= delta;
             }
-            if (translationComponent.Value.y > 100)
+            if (timedLapsed.Value > 1f)
             {
                 ecb.DestroyEntity(entityInQueryIndex, cropEntity);
             }
 
+            timedLapsed.Value += delta;
         }).ScheduleParallel();
 
         m_ECBSystem.AddJobHandleForProducer(Dependency);

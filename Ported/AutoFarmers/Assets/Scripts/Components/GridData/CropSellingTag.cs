@@ -3,4 +3,5 @@
 [GenerateAuthoringComponent]
 public struct CropSellingTag : IComponentData
 {
+    public float Value;
 }
