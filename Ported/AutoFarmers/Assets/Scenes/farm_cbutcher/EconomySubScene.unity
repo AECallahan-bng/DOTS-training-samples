@@ -300,8 +300,8 @@ MonoBehaviour:
   TeleporterCount: 20
   GenerateTilled: 0
   Rockthreshold: 0.4
-  AiRandomJitterTill: 2
-  AiRandomJitterPlant: 10
-  AiRandomJitterClear: 0
-  AiRandomJitterPick: 10
-  AiRandomJitterSell: 10
+  AiRandomJitterTill: 1
+  AiRandomJitterPlant: 1
+  AiRandomJitterClear: 1
+  AiRandomJitterPick: 3
+  AiRandomJitterSell: 2
