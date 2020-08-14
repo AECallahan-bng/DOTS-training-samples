@@ -24,14 +24,16 @@ public class SpawnDronesSystem : SystemBase
 
 			while (newResources >= droneCost.Cost)
 			{
-				float3 spawnPosition = new float3(resources.LastGridPosition.x + 0.5f, 1.0f, resources.LastGridPosition.y + 0.5f);
+				float3 spawnCenter = new float3(resources.LastGridPosition.x + 0.5f, 1.0f, resources.LastGridPosition.y + 0.5f);
 
 				for (int i = 0; i < droneCost.SpawnCount; i++)
 				{
 					Entity droneEntity = ecb.Instantiate(farmContent.Drone);
 					float3 offset = random.NextFloat3(new float3(-0.4f, 0.0f, -0.4f), new float3(+0.4f, 0.0f, +0.4f));
+					float3 spawnPosition = spawnCenter + offset;
 
-					ecb.SetComponent(droneEntity, new Unity.Transforms.Translation() { Value = spawnPosition + offset });
+					ecb.SetComponent(droneEntity, new Unity.Transforms.Translation() { Value = spawnPosition });
+					ecb.AddComponent(droneEntity, new MovePosition() { Value = spawnPosition });
 					ecb.AddComponent<AiTagDrone>(droneEntity);
 					ecb.AddComponent<AiTagCommandIdle>(droneEntity);
 					ecb.AddComponent<AiTargetCell>(droneEntity);

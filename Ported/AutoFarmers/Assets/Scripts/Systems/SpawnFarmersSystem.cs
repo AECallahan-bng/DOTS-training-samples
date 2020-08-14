@@ -29,10 +29,10 @@ public class SpawnFarmersSystem : SystemBase
 			while (newResources >= farmerCost.Value)
 			{
 				float3 spawnPosition = new float3(resources.LastGridPosition.x + 0.5f, 0, resources.LastGridPosition.y + 0.5f);
-				// float3 spawnPosition = MapGenerationSystem::GetCellMidpoint(resources.LastGridPosition);
 
 				var farmerEntity = ecb.Instantiate(farmContent.Farmer);
 				ecb.SetComponent(farmerEntity, new Unity.Transforms.Translation() { Value = spawnPosition });
+				ecb.AddComponent(farmerEntity, new MovePosition() { Value = spawnPosition });
 				ecb.AddComponent<AiTagFarmer>(farmerEntity);
 				ecb.AddComponent<AiTagCommandIdle>(farmerEntity);
 				ecb.AddComponent<AiTargetCell>(farmerEntity);
