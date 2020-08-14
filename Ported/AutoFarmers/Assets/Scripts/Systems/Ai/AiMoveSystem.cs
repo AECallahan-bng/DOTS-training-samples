@@ -15,7 +15,7 @@ public class AiMoveSystem : SystemBase
     {
 		float deltaTime = Time.DeltaTime;
 
-        Entities.ForEach((
+        Entities.WithNone<AiTagCommandIdle>().ForEach((
 			int entityInQueryIndex,
 			Entity aiEntity,
 			ref Translation currentPosition, 

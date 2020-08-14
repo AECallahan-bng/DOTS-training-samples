@@ -138,6 +138,7 @@ public class AiAssignCommandSystem : SystemBase
 				if (closestCropIndex != -1)
 				{
 					closestType = AiCommands.Pick;
+					closestPosition = crops[closestCropIndex].Value;
 					closestDistanceSq = closestCropDistanceSq;
 				}
 			}
@@ -183,6 +184,10 @@ public class AiAssignCommandSystem : SystemBase
 					closestType = AiCommands.Till;
 					closestPosition = untilledLand[closestUntilledLandIndex].Value;
 				}
+			}
+
+			if (selectedCommand == AiCommands.Idle)
+			{
 				selectedCommand = closestType;
 			}
 
