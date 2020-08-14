@@ -302,6 +302,6 @@ MonoBehaviour:
   Rockthreshold: 0.4
   AiRandomJitterTill: 1
   AiRandomJitterPlant: 1
-  AiRandomJitterClear: 1
+  AiRandomJitterClear: 0
   AiRandomJitterPick: 3
   AiRandomJitterSell: 2
