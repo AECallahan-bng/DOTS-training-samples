@@ -8,7 +8,8 @@ public class SpawnDronesSystem : SystemBase
 {
 	private Random m_Random;
 
-	protected override void OnCreate()
+    public int CurrentCount = 0;
+    protected override void OnCreate()
 	{
 		m_Random = new Random(0x1234567);
 	}
@@ -17,7 +18,7 @@ public class SpawnDronesSystem : SystemBase
 	{
 		var ecb = new EntityCommandBuffer(Allocator.TempJob);
 		var random = m_Random;
-
+		var createdCount = 0;
 		Entities.WithName("Spawn_Drones").ForEach((ref DroneResources resources, in DroneCost droneCost, in FarmContent farmContent) =>
 		{
 			int newResources = resources.Resources;
@@ -37,13 +38,14 @@ public class SpawnDronesSystem : SystemBase
 					ecb.AddComponent<AiTargetCell>(droneEntity);
 				}
 				newResources -= droneCost.Cost;
+				++createdCount;
 			}
 
 			resources.Resources = newResources;
 		}).Run();
 		ecb.Playback(EntityManager);
 		ecb.Dispose();
-
+		CurrentCount += createdCount;
 		m_Random = random;
 	}
 }

@@ -7,7 +7,7 @@ using Unity.Mathematics;
 public class SpawnFarmersSystem : SystemBase
 {
 	private Random m_Random;
-
+	public int CurrentCount=0;
 	protected override void OnCreate()
 	{
 		m_Random = new Random(0x1234567);
@@ -17,8 +17,9 @@ public class SpawnFarmersSystem : SystemBase
 	{
 		var ecb = new EntityCommandBuffer(Allocator.TempJob);
 		var random = m_Random;
+        var createdCount = 0;
 
-		Entities.WithName("Spawn_Farmers").ForEach((ref FarmerResources resources, in FarmerCost farmerCost, in FarmContent farmContent) =>
+        Entities.WithName("Spawn_Farmers").ForEach((ref FarmerResources resources, in FarmerCost farmerCost, in FarmContent farmContent) =>
 		{
 			int newResources = resources.Resources;
 
@@ -34,14 +35,16 @@ public class SpawnFarmersSystem : SystemBase
 				ecb.AddComponent<AiTargetCell>(farmerEntity);
 
 				newResources -= farmerCost.Value;
+				++createdCount;
 			}
 
 			resources.Resources = newResources;
 		}).Run();
 		ecb.Playback(EntityManager);
 		ecb.Dispose();
+        CurrentCount += createdCount;
 
-		m_Random = random;
+        m_Random = random;
 	}
 }
 
