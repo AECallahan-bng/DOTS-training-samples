@@ -113,7 +113,6 @@ public class MapGenerationSystem : SystemBase
                         ecb.RemoveComponent<CellTagPlantedGround>(cell);
                         ecb.RemoveComponent<CellTagGrownCrop>(cell);
                         ecb.AddComponent(cell, new RockHealth { Value = 2.0f });
-						ecb.AddBuffer<RockDamageReport>(cell);
 
                         var newOverE = ecb.Instantiate(content.Rock);
                         ecb.AddComponent(newOverE, new Translation() { Value = CellToWorld(cellPos, content.CellSize)+RockOffset});

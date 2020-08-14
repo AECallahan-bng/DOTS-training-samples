@@ -48,6 +48,7 @@ public class AiCommandClearSystem : SystemBase
 					DynamicBuffer<SectionWorldGrid> worldGrid = getWorldGrid[mapEntity];
 					Entity cellEntity = worldGrid[mapIndex].Value;
 					ecb.RemoveComponent<AssignedAi>(cellEntity);
+					ecb.AddBuffer<RockDamageReport>(cellEntity);
 					ecb.AppendToBuffer<RockDamageReport>(cellEntity, new RockDamageReport { Damage = deltaTime });
 				}
 			}).Run();
@@ -72,7 +73,7 @@ public class AiCommandClearSystem : SystemBase
 				{
 					rockHealth.Value -= damageReports[damageReportIndex].Damage;
 				}
-				ecb.SetBuffer<RockDamageReport>(cellEntity);
+				ecb.RemoveComponent<RockDamageReport>(cellEntity);
 
 				if (rockHealth.Value <= 0)
 				{
