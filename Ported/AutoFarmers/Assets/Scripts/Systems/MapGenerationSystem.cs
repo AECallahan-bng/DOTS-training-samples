@@ -8,6 +8,8 @@ using Unity.Transforms;
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public class MapGenerationSystem : SystemBase
 {
+	public int2 m_GridSize;
+
     static internal int PosToIndex(int2 size, int2 pos)
     {
         int i = pos.y * size.x + pos.x;
@@ -49,7 +51,9 @@ public class MapGenerationSystem : SystemBase
         var collision = ecb.AddBuffer<SectionWorldCollision>(mapEntity);
         
         var size2 = new int2(size.Width, size.Height);
-        for (int y = 0; y != size.Height; ++y)
+		m_GridSize = size2;
+
+		for (int y = 0; y != size.Height; ++y)
         {
             for (int x = 0; x != size.Width; ++x)
             {
