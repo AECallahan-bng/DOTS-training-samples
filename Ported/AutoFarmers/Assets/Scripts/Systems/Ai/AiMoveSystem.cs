@@ -35,7 +35,7 @@ public class AiMoveSystem : SystemBase
 				float deltaPosition = deltaTime * movementSpeed;
 
 				// farmers travel along manhattan coordinates and diagonals
-				// if (math.abs(direction.x) > math.abs(direction.z))
+				if (math.abs((int)direction.x / 10) >= math.abs((int)direction.z / 10))
 				{
 					if (direction.x > deltaPosition)
 					{
@@ -51,7 +51,7 @@ public class AiMoveSystem : SystemBase
 					}
 				}
 
-				// else
+				if (math.abs((int)direction.x / 10) <= math.abs((int)direction.z / 10))
 
 				{
 					if (direction.z > deltaPosition)
