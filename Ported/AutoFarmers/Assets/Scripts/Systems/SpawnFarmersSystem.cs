@@ -2,15 +2,19 @@
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
+using Unity.Transforms;
 
 [UpdateInGroup(typeof(InitializationSystemGroup))]
 public class SpawnFarmersSystem : SystemBase
 {
 	private Random m_Random;
+	public Entity m_FirstFarmer;
+	public float3 m_FirstFarmerPosition;
 
 	protected override void OnCreate()
 	{
 		m_Random = new Random(0x1234567);
+		m_FirstFarmer = Entity.Null;
 	}
 
 	protected override void OnUpdate()
@@ -42,6 +46,31 @@ public class SpawnFarmersSystem : SystemBase
 		ecb.Dispose();
 
 		m_Random = random;
+
+		if (m_FirstFarmer == Entity.Null)
+		{
+			var firstFarmer = m_FirstFarmer;
+
+			Entities.WithName("FindFirstFarmer").ForEach((
+				int entityInQueryIndex,
+				Entity farmerEntity,
+				in AiTagFarmer farmer) =>
+			{
+				if (firstFarmer == Entity.Null)
+				{
+					firstFarmer = farmerEntity;
+				}
+			}).Run();
+
+			m_FirstFarmer = firstFarmer;
+		}
+
+		if (m_FirstFarmer != Entity.Null)
+		{
+			var getTranslation = GetComponentDataFromEntity<Translation>(true);
+
+			m_FirstFarmerPosition = getTranslation[m_FirstFarmer].Value;
+		}
 	}
 }
 
