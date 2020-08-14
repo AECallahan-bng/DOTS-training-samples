@@ -397,4 +397,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   viewAngles: {x: 45, y: 30}
   viewDist: 10
+  minViewDist: 5
+  maxViewDist: 150
   mouseSensitivity: 4000
+  scrollSensitivity: 5
+  OverviewCamera: 0
